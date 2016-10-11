@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+import model.ModelMemory;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,10 +18,17 @@ import javafx.stage.Stage;
  * @author Asad
  */
 public class MainMemory extends Application {
-    
+
     @Override
     public void start(Stage primaryStage) {
-        Button btn = new Button();
+
+        ModelMemory model = new ModelMemory();
+        model.printList();
+        if (model.handleCardsPicked()) {
+            System.out.println("hejjjjjjj");
+        }
+
+        /*Button btn = new Button();
         btn.setText("Say 'Hello World'");
         btn.setOnAction(new EventHandler<ActionEvent>() {
             
@@ -37,7 +45,7 @@ public class MainMemory extends Application {
         
         primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
-        primaryStage.show();
+        primaryStage.show();*/
     }
 
     /**
@@ -46,5 +54,5 @@ public class MainMemory extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
