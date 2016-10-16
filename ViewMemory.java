@@ -173,7 +173,7 @@ public class ViewMemory extends BorderPane {
             getChildren().addAll(rect/*, model.getCardFromIndex(index)*/);
         }
 
-        public void redRect() {
+        public void realRect() {
             rect2 = new Rectangle(70, 100);
             rect2.setFill(Color.RED);
             rect2.setStroke(Color.AQUA);
@@ -184,11 +184,9 @@ public class ViewMemory extends BorderPane {
 
         public void hide(int col, int row, Object card) {
 
-            
-
             gridPane.getChildren().remove(card);
-            
-            redRect();
+
+            realRect();
 
             //System.out.println(getIndex() + " index");
             System.out.println(col + "row" + row);
