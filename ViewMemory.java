@@ -1,35 +1,20 @@
 
-import javafx.util.Duration;
 import java.util.ArrayList;
-import javafx.animation.FadeTransition;
-import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import model.Card;
+import java.lang.System;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.layout.FlowPane;
 
 import model.ModelMemory;
 
@@ -46,10 +31,10 @@ public class ViewMemory extends BorderPane {
 
     private final ModelMemory model;
     private ControllerMemory controller;
-    private ArrayList<CopyCard> rectList = new ArrayList<CopyCard>();
+    private ArrayList<Integer> cardsNotAvailable = new ArrayList<Integer>();
     private boolean cardIsPicked = false;
-    private Object temp;
-    CopyCard initTheCards;
+    private Object previousCard;
+    private int tempIndex;
     GridPane gridPane;
     private int clickedIndex;
 
@@ -75,29 +60,25 @@ public class ViewMemory extends BorderPane {
 
         this.setTop(root);
 
-        FlowPane bottomPane = new FlowPane();
-        bottomPane.setAlignment(Pos.CENTER);
-        bottomPane.setHgap(10);
-        bottomPane.setPadding(new Insets(5, 0, 0, 5));
-        bottomPane.getChildren().add(new Button("Hit me!"));
-        bottomPane.getChildren().add(new Button("No, hit me!"));
-        this.setBottom(bottomPane);
-
+//        VBox bottomPane = new VBox();
+//        bottomPane.setAlignment(Pos.BASELINE_LEFT);
+//        //bottomPane.setVgap(1);
+//        bottomPane.setPadding(new Insets(0, 0, 0, 0));
+//        bottomPane.getChildren().add(new Button("Hit me!"));
+//        bottomPane.getChildren().add(new Button("No, hit me!"));
+//        this.setRight(bottomPane);
+        
         gridPane = new GridPane();
         //gridPane.setGridLinesVisible(true);
         gridPane.setVgap(20);
         gridPane.setHgap(40);
 
-        for (int i = 0; i < model.getNrOfCards(); i++) {
-            initTheCards = new CopyCard(i);
-            initTheCards.setOnMouseClicked(new ClickHandler());
-            rectList.add(initTheCards);
-        }
-
         int i = 0;
         for (int col = 0; col < 5; col++) {
             for (int row = 0; row < 4; row++) {
-                gridPane.add(rectList.get(i), col, row);
+                //gridPane.add(rectList.get(i), col, row);
+                model.getCardFromIndex(i).setOnMouseClicked(new ClickHandler());
+                gridPane.add(model.getCardFromIndex(i), col, row);
                 i++;
             }
         }
@@ -122,186 +103,216 @@ public class ViewMemory extends BorderPane {
             //controller.hideCard(event.getSource());
             //col = GridPane.getColumnIndex((StackPane) event.getSource());
             //row = GridPane.getRowIndex((StackPane) event.getSource());
-
-            for (int i = 0; i < rectList.size(); i++) {
-                if (rectList.get(i).equals(event.getSource())) {
-                    clickedIndex = rectList.get(i).getIndex();
-                }
-            }
-
-            System.out.println(event.getSource() + " source");
-
-            model.setHiddenFalse(clickedIndex);
-            
-            rectList.clear();
-            
             for (int i = 0; i < model.getNrOfCards(); i++) {
-                initTheCards = new CopyCard(i);
-                initTheCards.setOnMouseClicked(new ClickHandler());
-                rectList.add(initTheCards);
-            }
-
-            int i = 0;
-            
-            for (int col = 0; col < 5; col++) {
-                for (int row = 0; row < 4; row++) {
-                    gridPane.add(rectList.get(i), col, row);
-                    i++;
+                if (model.getCardFromIndex(i).equals(event.getSource())) {
+                    clickedIndex = i;
                 }
             }
 
-            //initTheCards.hide(col, row, event.getSource());
-            System.out.println("Column: " + col + " Row: " + row);
+            model.setHiddenFalse(event.getSource());
 
-            //initTheCards.open();
-            /*if (cardIsPicked == true) {
-                System.out.println("Korten som skickas " + temp + event.getSource());
-                if (controller.handlePickedEvent(event.getSource().toString(), temp.toString())) {
+            if (cardIsPicked) {
+                System.out.println("Korten som skickas " + model.getCardFromIndex(tempIndex) + model.getCardFromIndex(clickedIndex));
+
+                if (controller.handlePickedEvent(previousCard, event.getSource())) {
                     System.out.println("You have a pair!");
+//                    model.setHiddenFalse(previousCard);
+//                    model.setHiddenFalse(event.getSource());
 
+                    cardsNotAvailable.add(tempIndex);
+                    cardsNotAvailable.add(clickedIndex);
+
+                } else {
+                    int k = 0;
+                    long time = System.currentTimeMillis();
+                    while (k == 0) {
+                        
+                        long timeAdd=System.currentTimeMillis();
+                        
+                        if (timeAdd > (time+500)) {
+                            model.setHiddenTrue(event.getSource());
+                            model.setHiddenTrue(previousCard);
+                            //model.setHiddenFalse(event.getSource());
+                            k=1;
+                        }
+                    }
                 }
                 cardIsPicked = false;
             } else {
                 cardIsPicked = true;
-                temp = event.getSource();
-            }*/
+                tempIndex = clickedIndex;
+                previousCard = event.getSource();
+            }
+
+//            rectList.clear();
+//
+//            for (int i = 0; i < model.getNrOfCards(); i++) {
+//                initTheCards = new CreateRect(i);
+//                //initTheCards.setOnMouseClicked(new ClickHandler());
+//                rectList.add(initTheCards);
+//                //rectList.get(i).setOnMouseClicked(new ClickHandler());
+//            }
+//
+//            for (int i = 0; i < model.getNrOfCards(); i++) {
+//                if (!cardsNotAvailable.contains(i)) {
+//                    rectList.get(i).setOnMouseClicked(new ClickHandler());
+//                    //rectList.add(initTheCards);
+//                }
+//            }
+//
+//            int i = 0;
+//
+//            for (int col = 0; col < 5; col++) {
+//                for (int row = 0; row < 4; row++) {
+//                    gridPane.add(rectList.get(i), col, row);
+//                    i++;
+//                }
+//            }
         }
+
     }
-
-    private class CopyCard extends StackPane {
-
-        char letter;
-        private Rectangle rect, rect2;
-        private Text text;
-        private int index;
-
-        public CopyCard(int index) {
-            this.index = index;
-            initCard(index);
-            letter = model.getCharacterOfCard(index);
-            //model.hideCard();
-        }
-
-        public void initCard(int index) {
-
-            getChildren().removeAll();
-            
-            rect = new Rectangle(70, 100);
-            rect.setFill(Color.RED);
-            rect.setStroke(Color.AQUA);
-            getChildren().addAll(rect, model.getCardFromIndex(index));
-        }
-
-        /*public void realRect() {
-            rect2 = new Rectangle(70, 100);
-            rect2.setFill(Color.RED);
-            rect2.setStroke(Color.AQUA);
-            
-            //getChildren().removeAll(rect);
-            //getChildren().addAll(rect2, model.getCardFromIndex(index));
-        }*/
-
- /*public void hide(int col, int row, Object card) {
-
-            
-            //gridPane.getChildren().remove(card);
-
-            realRect();
-
-            rect2 = new Rectangle(70, 100);
-            rect2.setFill(Color.RED);
-            rect2.setStroke(Color.AQUA);
-            
-            //getChildren().removeAll(rect);
-            
-            getChildren().addAll(rect2, model.getCardFromIndex(clickedIndex));
-            
-            //System.out.println(getIndex() + " index");
-            System.out.println(col + "row" + row);
-            System.out.println(model.getCardFromIndex(clickedIndex) + "the index clicked");
-            //gridPane.add(this, col, row);
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            //n String.valueOf(letter);
-        }*/
-        public int getIndex() {
-            return index;
-        }
-    }
-
-    /*private class InitCard extends StackPane {
-
-        char letter;
-        private Rectangle rect, rect2;
-        private Text text;
-        private int index;
-
-        public InitCard(int index) {
-            this.index = index;
-            initCard(index);
-            letter = model.getCharacterOfCard(index);
-            //model.hideCard();
-        }
-
-        public void initCard(int index) {
-
-            rect = new Rectangle(70, 100);
-            rect.setFill(Color.RED);
-            rect.setStroke(Color.AQUA);*/
-    //getChildren().add(rect/*, model.getCardFromIndex(index)*/);
-    //}
-
-    /*public void realRect() {
-            rect2 = new Rectangle(70, 100);
-            rect2.setFill(Color.RED);
-            rect2.setStroke(Color.AQUA);
-            
-            //getChildren().removeAll(rect);
-            getChildren().addAll(rect2, model.getCardFromIndex(index));
-        }
-
-        public void hide(int col, int row, Object card) {
-
-            gridPane.getChildren().remove(card);
-
-            realRect();
-
-            rect2 = new Rectangle(70, 100);
-            rect2.setFill(Color.RED);
-            rect2.setStroke(Color.AQUA);
-            
-            //getChildren().removeAll(rect);
-            
-            getChildren().addAll(rect2, model.getCardFromIndex(clickedIndex));
-            
-            //System.out.println(getIndex() + " index");
-            System.out.println(col + "row" + row);
-            System.out.println(model.getCardFromIndex(clickedIndex) + "the index clicked");
-            gridPane.add(this, col, row);
-            
-            //getChildren().addAll(rect2, model.getCardFromIndex(index));
-
-            /*rect2 = new Rectangle(70, 100);
-            rect2.setFill(Color.RED);
-            rect2.setStroke(Color.RED);*/
-    //getChildren().addAll(this.rect2, model.getCardFromIndex(index2));*/
+//
+//    public void sleep() {
+//        try {
+//            Thread t= new Thread();
+//            t.join();
+//            t.sleep(1000);
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(ViewMemory.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-/*
-        public int getIndex() {
-            return index;
-        }
+//    }
+//    private class CreateRect extends StackPane {
+//
+//        char letter;
+//        private Rectangle rect, rect2;
+//        private Text text;
+//        private int index;
+//
+//        public CreateRect(int index) {
+//            this.index = index;
+//            initCard(index);
+//            letter = model.getCharacterOfCard(index);
+//            //model.hideCard();
+//        }
+//
+//        public void initCard(int index) {
+//
+//            getChildren().removeAll();
+//
+//            rect = new Rectangle(70, 100);
+//
+//            getChildren().addAll(rect, model.getCardFromIndex(index));
+//        }
+//
+//        public int getIndex() {
+//            return index;
+//        }
+//    }
 
-        @Override
-        public String toString() {
-            return String.valueOf(letter);
-        }
-    }*/
+//    private class InitCard extends StackPane {
+//
+//        char letter;
+//        private Rectangle rect, rect2;
+//        private Text text;
+//        private int index;
+//
+//        public InitCard(int index) {
+//            this.index = index;
+//            initCard(index);
+//            letter = model.getCharacterOfCard(index);
+//            model.hideCard();
+//        }
+//
+//        public void initCard(int index) {
+//
+//            rect = new Rectangle(70, 100);
+//            rect.setFill(Color.RED);
+//            rect.setStroke(Color.AQUA);
+//    getChildren().add(rect, model.getCardFromIndex(index));
+//    }
+//    public void realRect() {
+//            rect2 = new Rectangle(70, 100);
+//            rect2.setFill(Color.RED);
+//            rect2.setStroke(Color.AQUA);
+//            
+//            getChildren().removeAll(rect);
+//            getChildren().addAll(rect2, model.getCardFromIndex(index));
+//        }
+//
+//        public void hide(int col, int row, Object card) {
+//
+//            gridPane.getChildren().remove(card);
+//
+//            realRect();
+//
+//            rect2 = new Rectangle(70, 100);
+//            rect2.setFill(Color.RED);
+//            rect2.setStroke(Color.AQUA);
+//            
+//            getChildren().removeAll(rect);
+//            
+//            getChildren().addAll(rect2, model.getCardFromIndex(clickedIndex));
+//            
+//            System.out.println(getIndex() + " index");
+//            System.out.println(col + "row" + row);
+//            System.out.println(model.getCardFromIndex(clickedIndex) + "the index clicked");
+//            gridPane.add(this, col, row);
+//            
+//            getChildren().addAll(rect2, model.getCardFromIndex(index));
+//
+//            rect2 = new Rectangle(70, 100);
+//            rect2.setFill(Color.RED);
+//            rect2.setStroke(Color.RED);
+//    getChildren().addAll(this.rect2, model.getCardFromIndex(index2));
+//        }
+//
+//        public int getIndex() {
+//            return index;
+//        }
+//
+//        @Override
+//        public String toString() {
+//            return String.valueOf(letter);
+//        }
+//    }
+// public void realRect() {
+//            rect2 = new Rectangle(70, 100);
+//            rect2.setFill(Color.RED);
+//            rect2.setStroke(Color.AQUA);
+//            
+//            //getChildren().removeAll(rect);
+//            //getChildren().addAll(rect2, model.getCardFromIndex(index));
+//        }
+//
+// public void hide(int col, int row, Object card) {
+//
+//            
+//            gridPane.getChildren().remove(card);
+//
+//            realRect();
+//
+//            rect2 = new Rectangle(70, 100);
+//            rect2.setFill(Color.RED);
+//            rect2.setStroke(Color.AQUA);
+//            
+//            getChildren().removeAll(rect);
+//            
+//            getChildren().addAll(rect2, model.getCardFromIndex(clickedIndex));
+//            
+//            System.out.println(getIndex() + " index");
+//            System.out.println(col + "row" + row);
+//            System.out.println(model.getCardFromIndex(clickedIndex) + "the index clicked");
+//            gridPane.add(this, col, row);
+//            
+//            
+//            
+//            
+//            
+//            
+//            
+//            
+//            
+//            
+//            //n String.valueOf(letter);
+//        }
 }
