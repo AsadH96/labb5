@@ -11,10 +11,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.lang.System;
+import javafx.animation.AnimationTimer;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import model.ModelMemory;
 
@@ -32,6 +37,7 @@ public class ViewMemory extends BorderPane {
     private final ModelMemory model;
     private ControllerMemory controller;
     private ArrayList<Integer> cardsNotAvailable = new ArrayList<Integer>();
+    //private ArrayList<Object> rectList=new ArrayList<Object>();
     private boolean cardIsPicked = false;
     private Object previousCard;
     private int tempIndex;
@@ -67,23 +73,7 @@ public class ViewMemory extends BorderPane {
 //        bottomPane.getChildren().add(new Button("Hit me!"));
 //        bottomPane.getChildren().add(new Button("No, hit me!"));
 //        this.setRight(bottomPane);
-        
-        gridPane = new GridPane();
-        //gridPane.setGridLinesVisible(true);
-        gridPane.setVgap(20);
-        gridPane.setHgap(40);
-
-        int i = 0;
-        for (int col = 0; col < 5; col++) {
-            for (int row = 0; row < 4; row++) {
-                //gridPane.add(rectList.get(i), col, row);
-                model.getCardFromIndex(i).setOnMouseClicked(new ClickHandler());
-                gridPane.add(model.getCardFromIndex(i), col, row);
-                i++;
-            }
-        }
-
-        this.setCenter(gridPane);
+        updateCards();
 
         Scene scene = new Scene(this);
 
@@ -93,31 +83,78 @@ public class ViewMemory extends BorderPane {
         primaryStage.show();
     }
 
+    public void updateCards() {
+        gridPane = new GridPane();
+        //gridPane.setGridLinesVisible(true);
+        gridPane.setVgap(20);
+        gridPane.setHgap(40);
+
+//        for (int i = 0; i < model.getNrOfCards(); i++) {
+//            if (!cardsNotAvailable.contains(i)) {
+//                model.getCardFromIndex(i).setOnMouseClicked(new ClickHandler());
+//                rectList.add(model.getCardFromIndex(i));
+//            }
+//        }
+
+        
+
+        int t = 0;
+        for (int col = 0; col < 5; col++) {
+            for (int row = 0; row < 4; row++) {
+                //gridPane.add(rectList.get(i), col, row);
+//                model.getCardFromIndex(t).setOnMouseClicked(new ClickHandler());
+                if (!cardsNotAvailable.contains(t)) {
+                    model.getCardFromIndex(t).setOnMouseClicked(new ClickHandler());
+                    gridPane.add(model.getCardFromIndex(t), col, row);
+//                rectList.add(model.getCardFromIndex(i));
+                } else {
+                    System.out.println("hehhhehhehhehh");
+                    gridPane.getChildren().remove(model.getCardFromIndex(t));
+                    StackPane sp=new StackPane();
+                    Rectangle rect;
+                    rect = new Rectangle(70, 100);
+                    rect.setFill(Color.RED);
+                    rect.setStroke(Color.AQUA);
+                    
+                    sp.getChildren().addAll(rect, model.getCardFromIndex(t));
+                    gridPane.add(sp, col, row);
+                }
+
+                t++;
+            }
+        }
+
+        System.out.println(cardsNotAvailable + " Cards not available");
+
+        this.setCenter(gridPane);
+    }
+
     private class ClickHandler implements EventHandler<MouseEvent> {
 
-        int col, row;
+        int col, row, preCol, preRow;
 
         @Override
         public void handle(MouseEvent event) {
 
-            //controller.hideCard(event.getSource());
-            //col = GridPane.getColumnIndex((StackPane) event.getSource());
-            //row = GridPane.getRowIndex((StackPane) event.getSource());
             for (int i = 0; i < model.getNrOfCards(); i++) {
                 if (model.getCardFromIndex(i).equals(event.getSource())) {
                     clickedIndex = i;
+                    System.out.println("CLicked index  " + clickedIndex);
                 }
             }
+            //controller.hideCard(event.getSource());
+//            col = GridPane.getColumnIndex((StackPane) event.getSource());
+//            row = GridPane.getRowIndex((StackPane) event.getSource());
 
-            model.setHiddenFalse(event.getSource());
+            model.setHiddenFalseIndex(clickedIndex);
 
+//            controller.setIndex(clickedIndex);
+//            controller.start();
             if (cardIsPicked) {
                 System.out.println("Korten som skickas " + model.getCardFromIndex(tempIndex) + model.getCardFromIndex(clickedIndex));
 
                 if (controller.handlePickedEvent(previousCard, event.getSource())) {
                     System.out.println("You have a pair!");
-//                    model.setHiddenFalse(previousCard);
-//                    model.setHiddenFalse(event.getSource());
 
                     cardsNotAvailable.add(tempIndex);
                     cardsNotAvailable.add(clickedIndex);
@@ -126,14 +163,11 @@ public class ViewMemory extends BorderPane {
                     int k = 0;
                     long time = System.currentTimeMillis();
                     while (k == 0) {
-                        
-                        long timeAdd=System.currentTimeMillis();
-                        
-                        if (timeAdd > (time+500)) {
+                        long timeAdd = System.currentTimeMillis();
+                        if (timeAdd > (time + 350)) {
                             model.setHiddenTrue(event.getSource());
                             model.setHiddenTrue(previousCard);
-                            //model.setHiddenFalse(event.getSource());
-                            k=1;
+                            k = 1;
                         }
                     }
                 }
@@ -141,8 +175,11 @@ public class ViewMemory extends BorderPane {
             } else {
                 cardIsPicked = true;
                 tempIndex = clickedIndex;
+
                 previousCard = event.getSource();
             }
+
+            updateCards();
 
 //            rectList.clear();
 //

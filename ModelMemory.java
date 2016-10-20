@@ -2,7 +2,6 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import javafx.scene.shape.Rectangle;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -52,63 +51,60 @@ public class ModelMemory {
         return cardlist.get(index);
     }
 
-    public char getCharacterOfCard(int index) {
+    /*public char getCharacterOfCard(int index) {
         return cardlist.get(index).getContent();
-    }
-
-    public void showCard() {
-        card.show();
-    }
-    
-    public void setHiddenTrue(Card card){
-        
-    }
-    
-    public void setHiddenFalse(int index){
-        /*for(int i=0; i<cardlist.size();i++){
-            if(cardlist.get(i).toString().equals(card.toString())){
-                System.out.println("hejsansvejsan");
-            }
-        }*/
-        
-        cardlist.get(index).setHiddenFalse();
-        System.out.println("Index: (model) " + index);
-    }
-
-    public void hideCard(Object card) {
-        
-        //this.card.hide(card);
-        
-        //System.out.println(card + " card");
-        
-        /*for (int i = 0; i < cardlist.size(); i++) {
-            //System.out.println(cardlist.get(i) + " - cardlist");
-            if (cardlist.get(i).toString().equals(card.toString())) {
-                System.out.println(this.card.getContent() + " + " + card.toString());
-                cardlist.get(i).hide();
-                //cardlist.remove(i);
-            }
-        }*/
-    }
-
-    /*public Rectangle getCardRect(int index){
-        Rectangle rect=new Rectangle();
-        rect=cardlist.get(index).getRectangle();
-        return rect;
     }*/
+
+//    public void showCard() {
+//        card.show();
+//    }
+
+    public void setHiddenTrue(Object card) {
+        for (int i = 0; i < cardlist.size(); i++) {
+            if (cardlist.get(i).equals(card)) {
+                cardlist.get(i).setHiddenTrue();
+            }
+        }
+
+    }
+
+    public void setHiddenFalse(Object card) {
+
+        for (int i = 0; i < cardlist.size(); i++) {
+            if (cardlist.get(i).equals(card)) {
+                cardlist.get(i).setHiddenFalse();
+            }
+        }
+//        cardlist.get(index).setHiddenFalse();
+//        System.out.println("Index: (model) " + index);
+    }
+    
+    public void setHiddenFalseIndex(int index) {
+
+//        for (int i = 0; i < cardlist.size(); i++) {
+//            if (cardlist.get(i).equals(card)) {
+//                cardlist.get(i).setHiddenFalse();
+//            }
+//        }
+        cardlist.get(index).setHiddenFalse();
+        //System.out.println("Index: (model) " + index);
+    }
+
     public int getNrOfCards() {
         return cardlist.size();
     }
-
-    public boolean handleCardsPicked(Object firstCard, Object secondCard) {
-        if (firstCard.equals(secondCard)) {
-            //System.out.println(cardlist.contains(secondCard.toString())+"hej");
-            //System.out.println(cardlist);
-            for (int i = 0; i < cardlist.size(); i++) {
-                if (cardlist.get(i).equals(secondCard)) {
-                    cardlist.remove(i);
-                }
+    
+    public boolean getHidden(Object card){
+        for (int i = 0; i < cardlist.size(); i++) {
+            if (cardlist.get(i).equals(card)) {
+                return cardlist.get(i).getHidden();
             }
+        }
+        return false;
+    }
+
+    public boolean handleCardsPicked(String firstCard, String secondCard) {
+        if (firstCard.equals(secondCard)) {
             return true;
         } else {
             return false;

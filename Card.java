@@ -85,6 +85,10 @@ public final class Card extends StackPane {
         hidden=true;
         hide();
     }
+    
+    public boolean getHidden(){
+        return hidden;
+    }
 
     @Override
     public String toString() {
