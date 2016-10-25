@@ -50,7 +50,6 @@ public class ViewMemory extends BorderPane {
     public ViewMemory(ModelMemory model) {
         this.model = model;
         controller = new ControllerMemory(this, this.model);
-        //this.primaryStage=primaryStage;
         initView();
     }
 
@@ -58,7 +57,7 @@ public class ViewMemory extends BorderPane {
         
         cardIsPicked=false;
         previousCard=null;
-        
+
         initMenu();
         updatePlayers();
         updateCards();
