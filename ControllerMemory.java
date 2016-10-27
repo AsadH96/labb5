@@ -84,7 +84,7 @@ public class ControllerMemory {
     
     public void resetGame(){
         model.reset();
-        view.initView();
+        //view.initView();
     }
     
     public void exitGame(){

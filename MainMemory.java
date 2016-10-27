@@ -35,6 +35,7 @@ public class MainMemory extends Application {
 //        usdValue = new Label("- - -");
         ModelMemory model = new ModelMemory();
         ViewMemory view = new ViewMemory(model/*, primaryStage*/);
+        model.addObserver(view);
 
         Scene scene = new Scene(view);
         primaryStage.setTitle("Memory");

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
  *
  * @author Asad
  */
-public class ModelMemory {
+public class ModelMemory  extends Observable{
 
     private ArrayList<Card> cardlist = new ArrayList<Card>();
     private Card card;
@@ -44,6 +45,13 @@ public class ModelMemory {
         playerTurn = 0;
         playerlist.get(0).resetPoints();
         playerlist.get(1).resetPoints();
+        
+        updateView();
+    }
+    
+    public void updateView(){
+        this.setChanged();
+        this.notifyObservers();
     }
 
     public void playWithAI() {
@@ -97,6 +105,7 @@ public class ModelMemory {
         for (int i = 0; i < cardlist.size(); i++) {
             if (cardlist.get(i).equals(card)) {
                 cardlist.get(i).setHiddenTrue();
+                updateView();
             }
         }
     }
@@ -106,6 +115,7 @@ public class ModelMemory {
         for (int i = 0; i < cardlist.size(); i++) {
             if (cardlist.get(i).equals(card)) {
                 cardlist.get(i).setHiddenFalse();
+                updateView();
             }
         }
 //        cardlist.get(index).setHiddenFalse();
@@ -142,6 +152,7 @@ public class ModelMemory {
         } else {
             playerTurn = 0;
         }
+        updateView();
     }
 
     public int getPlayerTurn() {
@@ -150,6 +161,7 @@ public class ModelMemory {
 
     public void addPoint(int index) {
         playerlist.get(index).addPoint();
+        updateView();
     }
 
     public int getPlayerPoints(int index) {

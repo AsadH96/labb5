@@ -4,6 +4,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.EventHandler;
@@ -36,7 +38,7 @@ import model.ModelMemory;
  *
  * @author Asad
  */
-public class ViewMemory extends BorderPane {
+public class ViewMemory extends BorderPane implements Observer {
 
     private ModelMemory model;
     private ControllerMemory controller;
@@ -51,8 +53,6 @@ public class ViewMemory extends BorderPane {
     }
 
     public void initView() {
-
-        this.model = model;
 
         cardsNotAvailable.clear();
 
@@ -237,10 +237,16 @@ public class ViewMemory extends BorderPane {
         alert.setHeaderText("Highscore:");
         String temp = "Position   Points\n------------------\n";
         for (int i = 0; i < model.getHighscoreSize(); i++) {
-            temp+= i+1 + ": \t\t" + model.getHighscore(i) + "\n\n";
+            temp += i + 1 + ": \t\t" + model.getHighscore(i) + "\n\n";
         }
         alert.setContentText(temp);
         alert.show();
+    }
+
+    @Override
+    public void update(Observable o, Object o1) {
+        updateCards();
+        updatePlayers();
     }
 
     private class ClickHandler implements EventHandler<MouseEvent> {
@@ -297,8 +303,8 @@ public class ViewMemory extends BorderPane {
             }
 
             //System.out.println(model.getAIRemember());
-            updateCards();
-            updatePlayers();
+            //updateCards();
+            //updatePlayers();
         }
 
     }
