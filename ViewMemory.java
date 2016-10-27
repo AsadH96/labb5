@@ -2,24 +2,16 @@
 import java.util.ArrayList;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import java.lang.System;
-import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
-import javafx.event.EventType;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -34,7 +26,6 @@ import model.ModelMemory;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author Asad
@@ -55,17 +46,23 @@ public class ViewMemory extends BorderPane {
 
     public void initView() {
         
-        cardIsPicked=false;
-        previousCard=null;
+        this.model=model;
 
-        initMenu();
+        cardsNotAvailable.clear();
+
+        cardIsPicked = false;
+        previousCard = null;
+
         updatePlayers();
         updateCards();
+        initMenu();
 
     }
-    
-    public void initMenu(){
-                
+
+    public void initMenu() {
+
+        cardsNotAvailable.clear();
+
         VBox root = new VBox();
 
         Menu fileMenu = new Menu("File");
@@ -82,10 +79,10 @@ public class ViewMemory extends BorderPane {
         reset.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                resetGame();
+                controller.resetGame();
             }
         });
-        
+
         MenuItem rules = new MenuItem("How To Play");
         rules.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -94,7 +91,15 @@ public class ViewMemory extends BorderPane {
             }
         });
 
-        fileMenu.getItems().addAll(rules, reset, exit);
+        MenuItem pause = new MenuItem("Pause Game");
+        pause.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                pauseGame();
+            }
+        });
+
+        fileMenu.getItems().addAll(pause, rules, reset, exit);
 
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu);
@@ -106,11 +111,10 @@ public class ViewMemory extends BorderPane {
     public void resetGame() {
         this.model = new ModelMemory();
         controller = new ControllerMemory(this, this.model);
-        cardsNotAvailable.clear();
         initView();
     }
-    
-    public void showRules(){
+
+    public void showRules() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText("How to play the game Memory:\n\n"
                 + "Pick one card from the board and the card will flip and reveal "
@@ -126,16 +130,27 @@ public class ViewMemory extends BorderPane {
         alert.show();
     }
 
+    public void pauseGame() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("PAUSE");
+        //alert.setResizable(true);
+        alert.setHeaderText("The game has been paused!\n\nClick OK to continue playing");
+        alert.show();
+    }
+
     public void updatePlayers() {
         AnchorPane anchor = new AnchorPane();
         HBox player1Box = new HBox();
         HBox player2Box = new HBox();
 
-        player1Box.getChildren().add(new Text(controller.getPlayer(0)));
-        player2Box.getChildren().add(new Text(controller.getPlayer(1)));
+        String player1 = model.getPlayerName(0) + "\nPoint(s): " + model.getPlayerPoints(0);
+        String player2 = model.getPlayerName(1) + "\nPoint(s): " + model.getPlayerPoints(1);
+
+        player1Box.getChildren().add(new Text(player1));
+        player2Box.getChildren().add(new Text(player2));
 
         HBox turnBox = new HBox();
-        turnBox.getChildren().add(new Text("Player turn:\n" + controller.getPlayerName(controller.getPlayerTurn())));
+        turnBox.getChildren().add(new Text("Player turn:\n" + model.getPlayerName(model.getPlayerTurn())));
 
         anchor.getChildren().addAll(player1Box, player2Box, turnBox);
         AnchorPane.setLeftAnchor(player1Box, 1.1);
@@ -193,7 +208,7 @@ public class ViewMemory extends BorderPane {
                     controller.setClickedIndex(i);
                 }
             }
- 
+
             controller.setHiddenFalse(event.getSource());
 
             if (cardIsPicked) {
@@ -227,7 +242,6 @@ public class ViewMemory extends BorderPane {
                 controller.setTempIndex(controller.getClickedIndex());
                 previousCard = event.getSource();
             }
-
             updateCards();
             updatePlayers();
         }
