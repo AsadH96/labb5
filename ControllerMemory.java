@@ -5,25 +5,33 @@
  */
 
 import javafx.animation.AnimationTimer;
-import model.ModelMemory;
+import model.*;
 
 /**
  *
  * @author Asad
  */
-public class ControllerMemory extends AnimationTimer {
+public class ControllerMemory {
     ModelMemory model;
     ViewMemory view;
     Object temp;
     private int index;
+    private int clickedIndex, tempIndex;
     
     public ControllerMemory(ViewMemory view, ModelMemory model){
         this.view = view;
         this.model = model;
     }
     
+    public void setHiddenFalse(Object card){
+        model.setHiddenFalse(card);
+    }
+    
+    public void setHiddenTrue(Object card){
+        model.setHiddenTrue(card);
+    }
+    
     public boolean handlePickedEvent(Object firstCard, Object secondCard){
-        System.out.println(firstCard + " " + secondCard);
         if(model.handleCardsPicked(firstCard.toString(), secondCard.toString())){
             return true;
         }else{
@@ -34,12 +42,53 @@ public class ControllerMemory extends AnimationTimer {
         }*/
     }
     
-    public void showCard(){
-        
+    public void setTempIndex(int index){
+        this.tempIndex=index;
     }
     
-    public void setIndex(int index){
-        this.index=index;
+    public void setClickedIndex(int index){
+        this.clickedIndex=index;
+    }
+    
+    public int getTempIndex(){
+        return tempIndex;
+    }
+    
+    public int getClickedIndex(){
+        return clickedIndex;
+    }
+    
+    public String getPlayer(int index){
+        return "Name: " + model.getPlayerName(index) + "\nPoint(s): " + model.getPlayerPoints(index);
+    }
+    
+    public String getPlayerName(int index){
+        return model.getPlayerName(index);
+    }
+    
+    public void addPoint(int index){
+        model.addPoint(index);
+    }
+    
+    public void switchPlayerTurn(){
+        model.switchPlayerTurn();
+    }
+    
+    public int getPlayerTurn(){
+        return model.getPlayerTurn();
+    }
+    
+    public int getPlayerPoints(int index){
+        return model.getPlayerPoints(index);
+    }
+    
+    public void resetGame(){
+        model.reset();
+        view.initView();
+    }
+    
+    public void exitGame(){
+        System.exit(0);
     }
     
     /*public void hideCard(Object card){
@@ -48,8 +97,4 @@ public class ControllerMemory extends AnimationTimer {
         //System.out.println("hej");
     }*/
 
-    @Override
-    public void handle(long now) {
-        model.setHiddenFalseIndex(index);
-    }
 }

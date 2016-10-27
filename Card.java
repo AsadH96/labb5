@@ -12,7 +12,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
@@ -63,7 +62,7 @@ public final class Card extends StackPane {
     }
 
     public void hide() {
-        FadeTransition ft = new FadeTransition(Duration.seconds(1), text);
+        FadeTransition ft = new FadeTransition(Duration.seconds(2), text);
         ft.setToValue(0);
 //        ft.play(); 
         SequentialTransition seqT=new SequentialTransition(text, ft);
@@ -73,7 +72,7 @@ public final class Card extends StackPane {
     public void hideStart() {
         FadeTransition ft = new FadeTransition(Duration.seconds(0.0001), text);
         ft.setToValue(0);
-        ft.play();        
+        ft.play();       
     }
     
     public void setHiddenFalse(){

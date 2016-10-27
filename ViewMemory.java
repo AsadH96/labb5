@@ -1,5 +1,11 @@
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Menu;
@@ -45,14 +51,19 @@ public class ViewMemory extends BorderPane {
     }
 
     public void initView() {
-        
-        this.model=model;
+
+        this.model = model;
 
         cardsNotAvailable.clear();
 
         cardIsPicked = false;
         previousCard = null;
 
+        try {
+            model.readHighscore();
+        } catch (IOException ex) {
+            System.out.println("Error reading highscore from file");
+        }
         updatePlayers();
         updateCards();
         initMenu();
@@ -99,7 +110,15 @@ public class ViewMemory extends BorderPane {
             }
         });
 
-        fileMenu.getItems().addAll(pause, rules, reset, exit);
+        MenuItem highscore = new MenuItem("Highscore");
+        highscore.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                getHighScore();
+            }
+        });
+
+        fileMenu.getItems().addAll(pause, rules, highscore, reset, exit);
 
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu);
@@ -157,6 +176,10 @@ public class ViewMemory extends BorderPane {
         AnchorPane.setRightAnchor(player2Box, 1.1);
         AnchorPane.setLeftAnchor(turnBox, 220.0);
         this.setBottom(anchor);
+
+        if (model.getPlayerPoints(0) + model.getPlayerPoints(1) >= 10) {
+            finishGame();
+        }
     }
 
     public void updateCards() {
@@ -196,6 +219,30 @@ public class ViewMemory extends BorderPane {
         this.setCenter(gridPane);
     }
 
+    public void finishGame() {
+        if (model.getPlayerPoints(0) > model.getPlayerPoints(1)) {
+            System.out.println("");
+            model.saveHighscore(0);
+        } else if (model.getPlayerPoints(0) < model.getPlayerPoints(1)) {
+            model.saveHighscore(1);
+        } else {
+            System.out.println("It's a draw!");
+        }
+    }
+
+    public void getHighScore() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("HIGHSCORE");
+        //alert.setResizable(true);
+        alert.setHeaderText("Highscore:");
+        String temp = "Position   Points\n------------------\n";
+        for (int i = 0; i < model.getHighscoreSize(); i++) {
+            temp+= i+1 + ": \t\t" + model.getHighscore(i) + "\n\n";
+        }
+        alert.setContentText(temp);
+        alert.show();
+    }
+
     private class ClickHandler implements EventHandler<MouseEvent> {
 
         int col, row, preCol, preRow;
@@ -211,6 +258,11 @@ public class ViewMemory extends BorderPane {
 
             controller.setHiddenFalse(event.getSource());
 
+            /*if (event.getSource() != previousCard) {
+                model.addCardToAI(event.getSource());
+            }*/
+            model.handleAICardsPicked(event.getSource());
+
             if (cardIsPicked) {
 
                 if (controller.handlePickedEvent(previousCard, event.getSource())) {
@@ -218,6 +270,7 @@ public class ViewMemory extends BorderPane {
                     cardsNotAvailable.add(controller.getClickedIndex());
                     controller.addPoint(controller.getPlayerTurn());
 
+                    //model.removeCardFromAI(event.getSource());
                 } else {
 
                     cardsNotAvailable.remove(cardsNotAvailable.size() - 1);
@@ -242,6 +295,8 @@ public class ViewMemory extends BorderPane {
                 controller.setTempIndex(controller.getClickedIndex());
                 previousCard = event.getSource();
             }
+
+            //System.out.println(model.getAIRemember());
             updateCards();
             updatePlayers();
         }

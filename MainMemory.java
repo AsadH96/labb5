@@ -7,6 +7,7 @@
 import model.ModelMemory;
 
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -33,7 +34,13 @@ public class MainMemory extends Application {
 //        skrInput = new TextField("Enter value...");
 //        usdValue = new Label("- - -");
         ModelMemory model = new ModelMemory();
-        ViewMemory view = new ViewMemory(model, primaryStage);
+        ViewMemory view = new ViewMemory(model/*, primaryStage*/);
+
+        Scene scene = new Scene(view);
+        primaryStage.setTitle("Memory");
+        primaryStage.setResizable(false);
+        primaryStage.setScene(scene);
+        primaryStage.show();
 
 //        view.initView(primaryStage);
 //        BorderPane border = new BorderPane();
