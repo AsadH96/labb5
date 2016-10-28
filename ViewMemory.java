@@ -1,13 +1,8 @@
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Menu;
@@ -130,7 +125,8 @@ public class ViewMemory extends BorderPane implements Observer {
     public void resetGame() {
         this.model = new ModelMemory();
         controller = new ControllerMemory(this, this.model);
-        initView();
+        //initView();
+        controller.resetGame();
     }
 
     public void showRules() {
@@ -184,7 +180,6 @@ public class ViewMemory extends BorderPane implements Observer {
 
     public void updateCards() {
         GridPane gridPane = new GridPane();
-        //gridPane.setGridLinesVisible(true);
         gridPane.setVgap(20);
         gridPane.setHgap(40);
 
@@ -233,7 +228,6 @@ public class ViewMemory extends BorderPane implements Observer {
     public void getHighScore() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("HIGHSCORE");
-        //alert.setResizable(true);
         alert.setHeaderText("Highscore:");
         String temp = "Position   Points\n------------------\n";
         for (int i = 0; i < model.getHighscoreSize(); i++) {
@@ -245,8 +239,10 @@ public class ViewMemory extends BorderPane implements Observer {
 
     @Override
     public void update(Observable o, Object o1) {
+        cardsNotAvailable.clear();
         updateCards();
         updatePlayers();
+        cardIsPicked = false;
     }
 
     private class ClickHandler implements EventHandler<MouseEvent> {
@@ -264,9 +260,6 @@ public class ViewMemory extends BorderPane implements Observer {
 
             controller.setHiddenFalse(event.getSource());
 
-            /*if (event.getSource() != previousCard) {
-                model.addCardToAI(event.getSource());
-            }*/
             model.handleAICardsPicked(event.getSource());
 
             if (cardIsPicked) {
@@ -301,10 +294,6 @@ public class ViewMemory extends BorderPane implements Observer {
                 controller.setTempIndex(controller.getClickedIndex());
                 previousCard = event.getSource();
             }
-
-            //System.out.println(model.getAIRemember());
-            //updateCards();
-            //updatePlayers();
         }
 
     }

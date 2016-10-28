@@ -6,32 +6,54 @@
 package model;
 
 /**
- *
+ * A player object with a name and a score
+ * 
  * @author Asad
  */
 public class Player {
+
     private String name;
     private int score;
-    
-    public Player(String name){
-        this.name=name;
-        score=0;
+
+    /**
+     * Constructor of the player object
+     * 
+     * @param name 
+     */
+    public Player(String name) {
+        this.name = name;
+        score = 0;
     }
-    
-    public String getName(){
+
+    /**
+     * Returns the name of the player
+     * 
+     * @return 
+     */
+    public String getName() {
         return name;
     }
-    
-    
-    public int getPoint(){
+
+    /**
+     * Returns the amount of points the player has
+     * 
+     * @return 
+     */
+    public int getPoint() {
         return score;
     }
-    
-    public void addPoint(){
-        score+=1;
+
+    /**
+     * Adds one point to the player
+     */
+    public void addPoint() {
+        score += 1;
     }
-    
-    public void resetPoints(){
-        score=0;
+
+    /**
+     * Resets the point of a player to 0
+     */
+    public void resetPoints() {
+        score = 0;
     }
 }

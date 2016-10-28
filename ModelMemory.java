@@ -19,10 +19,11 @@ import java.util.logging.Logger;
  * and open the template in the editor.
  */
 /**
+ * Model for a memory game.
  *
  * @author Asad
  */
-public class ModelMemory  extends Observable{
+public class ModelMemory extends Observable {
 
     private ArrayList<Card> cardlist = new ArrayList<Card>();
     private Card card;
@@ -33,11 +34,17 @@ public class ModelMemory  extends Observable{
     private boolean playWithAI;
     private ArrayList<Integer> highscore = new ArrayList<Integer>();
 
+    /**
+     * Constructur for model
+     */
     public ModelMemory() {
         ai = new AI(this); //Testing phase
         reset();
     }
 
+    /**
+     * Resets the whole game
+     */
     public void reset() {
         addCards();
         shuffleCards();
@@ -45,11 +52,14 @@ public class ModelMemory  extends Observable{
         playerTurn = 0;
         playerlist.get(0).resetPoints();
         playerlist.get(1).resetPoints();
-        
+
         updateView();
     }
-    
-    public void updateView(){
+
+    /**
+     * Notifies the observers of eventual changes in the model
+     */
+    public void updateView() {
         this.setChanged();
         this.notifyObservers();
     }
@@ -59,10 +69,9 @@ public class ModelMemory  extends Observable{
         ai = new AI(this);
     }
 
-    /*public Card createCard(char character){
-        Card card=new Card(character);
-        return card;
-    }*/
+    /**
+     * Creates cards and adds the cards to the cardlist
+     */
     public void addCards() {
 
         cardlist.clear();
@@ -76,56 +85,91 @@ public class ModelMemory  extends Observable{
         }
     }
 
+    /**
+     * Shuffles the cards
+     */
     public void shuffleCards() {
         Collections.shuffle(cardlist);
     }
-    
-    public void sortHighscore(){
+
+    /**
+     * Sorts the highscore list in descending order
+     */
+    public void sortHighscore() {
         Collections.sort(highscore, Collections.reverseOrder());
     }
 
+    /**
+     * Prints the list of cards
+     */
     public void printList() {
         System.out.println(cardlist.toString());
     }
 
+    /**
+     * Returns a card from a specific index in the cardlist
+     *
+     * @param index
+     * @return
+     */
     public Card getCardFromIndex(int index) {
-        /*Card c = new Card(cardlist.get(index).getContent());
-        return c;*/
         return cardlist.get(index);
     }
 
+    /**
+     * Returns the character of a card in a specific index
+     *
+     * @param index
+     * @return
+     */
     public char getCharacterOfCard(int index) {
         return cardlist.get(index).getContent();
     }
 
-//    public void showCard() {
-//        card.show();
-//    }
+    /**
+     * Hides a card
+     *
+     * @param card
+     */
     public void setHiddenTrue(Object card) {
         for (int i = 0; i < cardlist.size(); i++) {
             if (cardlist.get(i).equals(card)) {
                 cardlist.get(i).setHiddenTrue();
-                updateView();
+                //updateView();
             }
         }
     }
 
+    /**
+     * Shows a card
+     *
+     * @param card
+     */
     public void setHiddenFalse(Object card) {
 
         for (int i = 0; i < cardlist.size(); i++) {
             if (cardlist.get(i).equals(card)) {
                 cardlist.get(i).setHiddenFalse();
-                updateView();
+                //updateView();
             }
         }
-//        cardlist.get(index).setHiddenFalse();
-//        System.out.println("Index: (model) " + index);
     }
 
+    /**
+     * Returns the size of the cardlist
+     *
+     * @return
+     */
     public int getNrOfCards() {
         return cardlist.size();
     }
 
+    /**
+     * Checks if a card is hidden, ie has its hidden-flag set to true
+     * 
+     * @param card
+     * @return 
+     */
     public boolean getHidden(Object card) {
         for (int i = 0; i < cardlist.size(); i++) {
             if (cardlist.get(i).equals(card)) {
@@ -135,6 +179,9 @@ public class ModelMemory  extends Observable{
         return false;
     }
 
+    /**
+     * Creates players and adds them to the list
+     */
     public void initPlayers() {
         player = new Player("Player 1");
         playerlist.add(player);
@@ -142,10 +189,19 @@ public class ModelMemory  extends Observable{
         playerlist.add(player);
     }
 
+    /**
+     * Returns the name of a player
+     *
+     * @param index
+     * @return
+     */
     public String getPlayerName(int index) {
         return playerlist.get(index).getName();
     }
 
+    /**
+     * Switches the turn of the player
+     */
     public void switchPlayerTurn() {
         if (playerTurn == 0) {
             playerTurn = 1;
@@ -155,19 +211,42 @@ public class ModelMemory  extends Observable{
         updateView();
     }
 
+    /**
+     * Returns which player has the turn
+     *
+     * @return
+     */
     public int getPlayerTurn() {
         return playerTurn;
     }
 
+    /**
+     * Adds a point to a player
+     *
+     * @param index
+     */
     public void addPoint(int index) {
         playerlist.get(index).addPoint();
         updateView();
     }
 
+    /**
+     * Returns the points a player have
+     *
+     * @param index
+     * @return
+     */
     public int getPlayerPoints(int index) {
         return playerlist.get(index).getPoint();
     }
 
+    /**
+     * Checks if the first and second card matches
+     *
+     * @param firstCard
+     * @param secondCard
+     * @return
+     */
     public boolean handleCardsPicked(String firstCard, String secondCard) {
         if (firstCard.equals(secondCard)) {
             return true;
@@ -192,15 +271,31 @@ public class ModelMemory  extends Observable{
     public Object getAIRemember() {
         return ai.getAll();
     }
-    
-    public String getHighscore(int index){
+
+    /**
+     * Returns the highscore list
+     *
+     * @param index
+     * @return
+     */
+    public String getHighscore(int index) {
         return highscore.get(index).toString();
     }
-    
-    public int getHighscoreSize(){
+
+    /**
+     * Returns the size of the highscore list
+     *
+     * @return
+     */
+    public int getHighscoreSize() {
         return highscore.size();
     }
 
+    /**
+     * Saves the highscores in a textfile
+     *
+     * @param player
+     */
     public void saveHighscore(int player) {
 
         System.out.println(getPlayerPoints(player));
@@ -222,6 +317,11 @@ public class ModelMemory  extends Observable{
         }
     }
 
+    /**
+     * Reads the highscores from a textfile
+     *
+     * @throws IOException
+     */
     public void readHighscore() throws IOException {
         BufferedReader bin = null;
 
@@ -237,7 +337,7 @@ public class ModelMemory  extends Observable{
                 temp = bin.readLine();
                 if (temp != null) {
                     highscore.add(Integer.parseInt(temp));
-                    if(highscore.size()>=10){
+                    if (highscore.size() >= 10) {
                         return;
                     }
                 }

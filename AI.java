@@ -44,12 +44,11 @@ public class AI {
             remember.remove(card);
         }
     }
-    
+
     /*private void compareCardList(){
         if
     }*/
-    
-    public Object getAll(){
+    public Object getAll() {
         return remember.clone();
     }
 }
