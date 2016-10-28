@@ -28,7 +28,7 @@ public class MemoryController {
     public void resetGame() {
         model.resetGame();
         //view.updateOnReset();
-    }
+    }//Hej
 
     public void showRules() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

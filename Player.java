@@ -24,7 +24,7 @@ public class Player {
     public int getPoints(){
         return points;
     }
-    
+    //Hej
     public void resetPoints(){
         points=0;
     }

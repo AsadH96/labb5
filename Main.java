@@ -21,7 +21,7 @@ public class Main extends Application{
         MemoryModel model = new MemoryModel();
         MemoryView view = new MemoryView(model);
         model.addObserver(view);
-        
+        //Hej
         Scene scene = new Scene(view,500,600);
         primaryStage.setTitle("Memory");
         primaryStage.setScene(scene);

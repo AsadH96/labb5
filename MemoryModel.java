@@ -113,7 +113,7 @@ public class MemoryModel extends Observable {
             if (cardlist.get(i).equals(card)) {
                 cardlist.get(i).setUnchangeable(stat);
             }
-        }
+        }//hej
     }
 
     public boolean getChangeable(Object card) {

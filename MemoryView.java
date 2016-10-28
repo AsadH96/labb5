@@ -226,7 +226,7 @@ public class MemoryView extends BorderPane implements Observer {
 
         public void handle(MouseEvent event) {
             //showCard(event.getSource());
-
+//hej
             if (model.getChangeable(getCard(event.getSource()))) {
                 showCard(event.getSource());
                 if (cardIsPicked) {

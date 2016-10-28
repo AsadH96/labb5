@@ -24,7 +24,7 @@ public class Card{
     public boolean getChangeable(){
         return changeable;
     }
-
+//hej
     public char getContent() {
         return content;
     }

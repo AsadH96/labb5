@@ -54,7 +54,7 @@ public class AI {
                 }
             }
         }
-    }
+    }//Hej
 
     public void test(Object card) {
         compareCardList(card);
