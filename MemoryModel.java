@@ -79,10 +79,11 @@ public class MemoryModel extends Observable {
         return cardlist.get(index);
     }
 
-    public ArrayList getCards() {
-        ArrayList<Card> temp = new ArrayList<Card>();
-        temp = cardlist;
-        return temp;
+    public ArrayList<Object> getCards() {
+//        ArrayList<Card> temp = new ArrayList<Card>();
+//        temp = cardlist;
+//        return temp;
+          return (ArrayList<Object>)cardlist.clone();
     }
 
     public void addCards() {

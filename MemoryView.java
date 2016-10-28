@@ -34,7 +34,7 @@ public class MemoryView extends BorderPane implements Observer {
     private Rectangle borders;
     private Text text;
     private ArrayList<StackPane> sp;
-    private ArrayList<Card> cards;
+    private ArrayList<Object> cards;
 
     public MemoryView(MemoryModel model) {
         this.model = model;
@@ -141,7 +141,7 @@ public class MemoryView extends BorderPane implements Observer {
         //sp.clear();
         // cards.clear();
         sp = new ArrayList<StackPane>();
-        cards = new ArrayList<Card>();
+        cards = new ArrayList<Object>();
         cards = model.getCards();
 
         FlowPane middlePane = new FlowPane();
