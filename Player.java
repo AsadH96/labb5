@@ -3,57 +3,34 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package model;
+package memory;
 
 /**
- * A player object with a name and a score
- * 
- * @author Asad
+ *
+ * @author LENOVO
  */
 public class Player {
-
+    private int points;
     private String name;
-    private int score;
-
-    /**
-     * Constructor of the player object
-     * 
-     * @param name 
-     */
-    public Player(String name) {
-        this.name = name;
-        score = 0;
+    public Player(String name, int points)
+    {
+        this.name=name;
+        this.points=points;
     }
-
-    /**
-     * Returns the name of the player
-     * 
-     * @return 
-     */
-    public String getName() {
+    
+    public void addPoint(){
+        this.points=this.points+1;
+    }
+    public int getPoints(){
+        return points;
+    }
+    
+    public void resetPoints(){
+        points=0;
+    }
+    
+    public String getName(){
         return name;
     }
-
-    /**
-     * Returns the amount of points the player has
-     * 
-     * @return 
-     */
-    public int getPoint() {
-        return score;
-    }
-
-    /**
-     * Adds one point to the player
-     */
-    public void addPoint() {
-        score += 1;
-    }
-
-    /**
-     * Resets the point of a player to 0
-     */
-    public void resetPoints() {
-        score = 0;
-    }
+    
 }

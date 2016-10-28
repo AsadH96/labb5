@@ -1,5 +1,10 @@
 package memory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
+import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -11,16 +16,25 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
-public class MemoryView extends BorderPane {
+public class MemoryView extends BorderPane implements Observer {
 
     private MemoryModel model;
     private MemoryController controller;
     private boolean cardIsPicked = false;
     private Object temp, temp1;
     private FlowPane middlePane;
+    private Rectangle borders;
+    private Text text;
+    private ArrayList<StackPane> sp;
+    private ArrayList<Card> cards;
 
     public MemoryView(MemoryModel model) {
         this.model = model;
@@ -29,12 +43,20 @@ public class MemoryView extends BorderPane {
         //updateFromModel();
     }
 
-    public void UpdateOnReset() {
+    public void updateOnReset() {
         updateFromModel();
         updatePlayers();
+        cardIsPicked = false;
+//        this.getChildren().clear(); //updated
+//        initView(); // updated
     }
 
     private void initView() {
+        try {
+            model.readHighscore();
+        } catch (IOException ex) {
+            System.out.println("Error reading highscore from file");
+        }
         //Menu
         VBox root = new VBox();
         Menu fileMenu = new Menu("File");
@@ -61,6 +83,13 @@ public class MemoryView extends BorderPane {
             }
         }
         );
+        MenuItem highscore = new MenuItem("Highscore");
+        highscore.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                controller.getHighScore();
+            }
+        });
         MenuItem pause = new MenuItem("Pause");
         pause.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -68,7 +97,7 @@ public class MemoryView extends BorderPane {
                 controller.pause();
             }
         });
-        fileMenu.getItems().addAll(rules, reset, pause, exitItem);
+        fileMenu.getItems().addAll(rules, reset, highscore, pause, exitItem);
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu);
         root.getChildren().add(menuBar);
@@ -94,19 +123,101 @@ public class MemoryView extends BorderPane {
         AnchorPane.setLeftAnchor(turn, 220.0);
         AnchorPane.setRightAnchor(box1, 1.1);
 
+        if (model.getPlayerPoints(0) + model.getPlayerPoints(1) >= 10) {
+            System.out.println("It's done");
+            if(model.getPlayerPoints(0)>model.getPlayerPoints(1)){
+                model.getHighestScore(0);
+            }else if(model.getPlayerPoints(0)<model.getPlayerPoints(1)){
+                model.getHighestScore(1);
+            }else{
+                System.out.println("It's a draw!");
+            }
+        }
+
         this.setBottom(ap);
     }
 
     public void updateFromModel() {
+        //sp.clear();
+        // cards.clear();
+        sp = new ArrayList<StackPane>();
+        cards = new ArrayList<Card>();
+        cards = model.getCards();
+
         FlowPane middlePane = new FlowPane();
         middlePane.setPadding(new Insets(50, 50, 50, 50));
         middlePane.setVgap(10);
         middlePane.setHgap(10);
+
         for (int i = 0; i < model.getNrOfCards(); i++) {
-            middlePane.getChildren().add(model.getCard(i));
-            model.getCard(i).setOnMouseClicked(new MouseClickHandler());
+            StackPane stack = new StackPane();
+            borders = new Rectangle(70, 100);
+            borders.setFill(Color.WHITE);
+            borders.setStroke(Color.BLACK);
+
+            text = new Text(String.valueOf(model.getCardContent(i)));
+            text.setStroke(Color.BLACK);
+            text.setFont(Font.font(30));
+            stack.getChildren().addAll(borders, text);
+
+            sp.add(stack);
+            middlePane.getChildren().add(stack);
+            stack.setOnMouseClicked(new MouseClickHandler());
+            hideFromStart();
         }
         this.setCenter(middlePane);
+    }
+
+    public void showCard(Object stack) {
+        for (int i = 0; i < sp.size(); i++) {
+            if (stack.equals(sp.get(i))) {
+                System.out.println(sp.get(i).getChildren().get(1));
+                FadeTransition fade = new FadeTransition(Duration.seconds(0.5), sp.get(i).getChildren().get(1));
+                fade.setToValue(1);
+                fade.play();
+                model.showCard(i);
+            }
+        }
+    }
+
+    public void hideFromStart() {
+        FadeTransition fade = new FadeTransition(Duration.seconds(0.001), text);
+        fade.setToValue(0);
+        fade.play();
+
+    }
+
+    public void hideCard(Object stack) {
+        for (int i = 0; i < sp.size(); i++) {
+            if (stack.equals(sp.get(i))) {
+                FadeTransition fade = new FadeTransition(Duration.seconds(1), sp.get(i).getChildren().get(1));
+                fade.setFromValue(1);
+                fade.setToValue(0);
+                fade.play();
+
+                model.hideCard(i);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        String info = "Text: " + text;
+        return info;
+    }
+
+    @Override
+    public void update(Observable o, Object o1) {
+        updateOnReset();
+    }
+
+    public Object getCard(Object stack) {
+        for (int i = 0; i < sp.size(); i++) {
+            if (stack.equals(sp.get(i))) {
+                return cards.get(i);
+            }
+        }
+        return null;
     }
 
     private class MouseClickHandler implements EventHandler<MouseEvent> {
@@ -114,30 +225,26 @@ public class MemoryView extends BorderPane {
         @Override
 
         public void handle(MouseEvent event) {
-                if (model.getChangeable(event.getSource())) {
+            //showCard(event.getSource());
 
-                    System.out.println(event.getSource());
-                    model.showCard(event.getSource());
-                    model.rememberCard(event.getSource());
-                    if (cardIsPicked) {
-                        if (!controller.compareCards(event.getSource(), temp)) {
-                            System.out.println("Not equal");
-                            model.hideCard(temp);
-                            model.hideCard(event.getSource());
-                            model.switchPlayerTurn();
-                        } else {
-                            model.addPoint(model.getPlayerTurn());
-                        }
-                        cardIsPicked = false;
+            if (model.getChangeable(getCard(event.getSource()))) {
+                showCard(event.getSource());
+                if (cardIsPicked) {
+                    if (!controller.compareCards(getCard(event.getSource()), getCard(temp))) {
+                        System.out.println("Not equal");
+                        hideCard(temp);
+                        hideCard(event.getSource());
+                        model.switchPlayerTurn();
                     } else {
-                        cardIsPicked = true;
-                        temp = event.getSource();
+                        model.addPoint(model.getPlayerTurn());
                     }
+                    cardIsPicked = false;
+                } else {
+                    cardIsPicked = true;
+                    temp = event.getSource();
                 }
-
-                updatePlayers();
-            
-                
+            }
+            updatePlayers();
         }
     }
 }

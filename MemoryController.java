@@ -22,12 +22,12 @@ public class MemoryController {
     }
 
     public void exitGame() {
-        System.exit(0);
+        model.exitGame();
     }
 
     public void resetGame() {
         model.resetGame();
-        view.UpdateOnReset();
+        //view.updateOnReset();
     }
 
     public void showRules() {
@@ -37,6 +37,19 @@ public class MemoryController {
         alert.setResizable(true);
         alert.setTitle("How To Play");
         alert.show();
+    }
+    public void getHighScore(){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("HIGHSCORE");
+        //alert.setResizable(true);
+        alert.setHeaderText("Highscore:");
+        String temp = "Position   Points\n------------------\n";
+        for (int i = 0; i < model.getHighscoreSize(); i++) {
+            temp+= i+1 + ": \t\t" + model.getHighscore(i) + "\n\n";
+        }
+        alert.setContentText(temp);
+        alert.show();
+
     }
     public void pause(){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

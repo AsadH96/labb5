@@ -5,12 +5,18 @@
  */
 package memory;
 
-import static java.lang.Math.random;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
+import java.util.Observable;
 
-public class MemoryModel {
+public class MemoryModel extends Observable {
 
     private ArrayList<Card> cardlist;
     private ArrayList<Player> players;
@@ -18,6 +24,7 @@ public class MemoryModel {
     private Player player;
     private static int playerturn;
     private AI aI;
+    private ArrayList<Integer> highscore = new ArrayList<Integer>();
 
     public MemoryModel() {
 
@@ -37,7 +44,7 @@ public class MemoryModel {
     public void switchPlayerTurn() {
         if (playerturn == 0) {
             playerturn = 1;
-            aIPick();
+            //aIPick();
         } else {
             playerturn = 0;
         }
@@ -55,7 +62,7 @@ public class MemoryModel {
         addCards();
         shuffleCard();
         resetPlayerPoints();
-
+        updateView();
     }
 
     public void shuffleCard() {
@@ -63,8 +70,19 @@ public class MemoryModel {
 
     }
 
+    public char getCardContent(int index) {
+        char c = cardlist.get(index).getContent();
+        return c;
+    }
+
     public Card getCard(int index) {
         return cardlist.get(index);
+    }
+
+    public ArrayList getCards() {
+        ArrayList<Card> temp = new ArrayList<Card>();
+        temp = cardlist;
+        return temp;
     }
 
     public void addCards() {
@@ -81,23 +99,12 @@ public class MemoryModel {
         return cardlist.size();
     }
 
-    public void showCard(Object card) {
-        for (int i = 0; i < cardlist.size(); i++) {
-            if (cardlist.get(i).equals(card)) {
-                cardlist.get(i).showCard();
-                cardlist.get(i).setUnchangeable(false);
-                //aI.rememberCard(card);
-            }
-        }
+    public void showCard(int i) {
+        cardlist.get(i).setUnchangeable(false);
     }
 
-    public void hideCard(Object card) {
-        for (int i = 0; i < cardlist.size(); i++) {
-            if (cardlist.get(i).equals(card)) {
-                cardlist.get(i).hideCard();
-                cardlist.get(i).setUnchangeable(true);
-            }
-        }
+    public void hideCard(int i) {
+        cardlist.get(i).setUnchangeable(true);
     }
 
     public void setUnchangeable(Object card, boolean stat) {
@@ -146,6 +153,8 @@ public class MemoryModel {
     public String getPlayer(int index) {
         return "Name: " + getPlayerName(index) + "\nPoints: " + getPlayerPoints(index);
     }
+    
+    
 
     public String showRules() {
         return "How to play the game Memory:\n\n"
@@ -166,31 +175,113 @@ public class MemoryModel {
         }
     }
 
-    public void aIPick() {
-        if (aI.sameCards()) {
-            aI.showSameCards();
-        } else {
-            //aI.pickCard();
-            Random generator = new Random();
-            int i = generator.nextInt(20);
-            showCard(cardlist.get(i));
-            System.out.println("He picks "+cardlist.get(i));
-            if (!aI.compareCardList(cardlist.get(i))) {
-                Random gene = new Random();
-               int g = gene.nextInt(20);
-                showCard(cardlist.get(g));
-                System.out.println("Now he picks: "+cardlist.get(g));
-                if(!compareCards(cardlist.get(i),cardlist.get(g))){
-                    hideCard(cardlist.get(i));
-                    hideCard(cardlist.get(g));
+//    public void aIPick() {
+//        if (aI.sameCards()) {
+//            aI.showSameCards();
+//        } else {
+//            //aI.pickCard();
+//            Random generator = new Random();
+//            int i = generator.nextInt(20);
+//            showCard(cardlist.get(i));
+//            System.out.println("He picks " + cardlist.get(i));
+//            if (!aI.compareCardList(cardlist.get(i))) {
+//                Random gene = new Random();
+//                int g = gene.nextInt(20);
+//                showCard(cardlist.get(g));
+//                System.out.println("Now he picks: " + cardlist.get(g));
+//                if (!compareCards(cardlist.get(i), cardlist.get(g))) {
+//                    hideCard(cardlist.get(i));
+//                    hideCard(cardlist.get(g));
+//                }
+//
+//            }
+//
+//        }
+//    }
+    public void rememberCard(Object card) {
+        aI.rememberCard(card);
+    }
+    
+    public void getHighestScore(int player){
+        getPlayerPoints(player);
+        highscore.add(player);
+        saveHighscore(player);
+    }
+
+    public void readHighscore() throws IOException {
+        BufferedReader bin = null;
+//        System.out.println(highscore);
+
+        try {
+            bin = new BufferedReader(new FileReader("highscore.txt"));
+
+            String temp = bin.readLine();
+
+            highscore.add(Integer.parseInt(temp));
+
+            while (temp != null) {
+
+                temp = bin.readLine();
+                if (temp != null) {
+                    highscore.add(Integer.parseInt(temp));
+                    if (highscore.size() >= 10) {
+                        return;
+                    }
                 }
-                    
             }
 
+        } catch (FileNotFoundException fnf) {
+            System.out.println("File not found!\n");
+            return;
+        } finally {
+            if (bin != null) {
+                bin.close();
+            }
+        }
+        sortHighscore();
+//        System.out.println(highscore);
+    }
+
+    public void sortHighscore() {
+        Collections.sort(highscore, Collections.reverseOrder());
+
+    }
+
+    public String getHighscore(int index) {
+        return highscore.get(index).toString();
+    }
+
+    public int getHighscoreSize() {
+        return highscore.size();
+    }
+
+    public void saveHighscore(int player) {
+
+        System.out.println(getPlayerPoints(player));
+        PrintWriter pout = null;
+        highscore.add(getPlayerPoints(player));
+
+        try {
+            pout = new PrintWriter(new BufferedWriter(new FileWriter("highscore.txt")));
+
+            for (int i = 0; i < highscore.size(); i++) {
+                pout.println(highscore.get(i));
+            }
+        } catch (IOException exception) {
+            System.out.println("Error saving highscore");
+        } finally {
+            if (pout != null) {
+                pout.close();
+            }
         }
     }
 
-    public void rememberCard(Object card) {
-        aI.rememberCard(card);
+    public void updateView() {
+        this.setChanged();
+        this.notifyObservers();
+    }
+
+    public void exitGame() {
+        System.exit(0);
     }
 }
