@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
@@ -25,10 +26,12 @@ import javafx.collections.ObservableList;
  */
 public class EntertainmentModel implements DatabaseInterface {
 
-    String user, server, pwd, database, category, args[], searchWord, table, col1, col2, foundArtistName;
-    int whereCond = 0, chosenCategory;
+    String user, server, pwd, database, category, args[], table, col1, col2, foundArtistName, foundGenreName, foundAlbumFromGenre;
+    int whereCond = 0;
     private ObservableList<Person> personList = FXCollections.observableArrayList();
     private ObservableList<MusicAlbum> albumList = FXCollections.observableArrayList();
+    private ObservableList<Genre> genreList = FXCollections.observableArrayList();
+    private ArrayList<String> albumFromGenre = new ArrayList<>();
 
     public EntertainmentModel(String args[]) throws Exception {
         this.args = args;
@@ -51,10 +54,10 @@ public class EntertainmentModel implements DatabaseInterface {
     }
 
     public void search(int category, String searchWord) {
-        this.searchWord = searchWord;
-        this.chosenCategory = category;
         personList.clear();
         albumList.clear();
+        genreList.clear();
+        albumFromGenre.clear();
 
         if (category == 0) {
             this.table = "Person";
@@ -69,7 +72,9 @@ public class EntertainmentModel implements DatabaseInterface {
         } else if (category == 2) {
 
         } else if (category == 3) {
-
+            this.table = "Genre";
+            this.col1 = "Category";
+            this.whereCond = 1;
         } else if (category == 4) {
             this.table = "Movie";
             this.col1 = "title";
@@ -85,21 +90,21 @@ public class EntertainmentModel implements DatabaseInterface {
         }
         connect(args);
         try {
-            testExample();
+            testExample(category, searchWord);
         } catch (Exception ex) {
             Logger.getLogger(EntertainmentModel.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void testExample() throws Exception {
+    public void testExample(int chosenCategory, String searchWord) throws Exception {
 
         Connection con = null;
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            //java.sql.Driver d=new com.mysql.jdbc.Driver();
+            java.sql.Driver d = new com.mysql.jdbc.Driver();
             con = DriverManager.getConnection(server, user, pwd);
             System.out.println("Connected!");
-            //System.out.println(this.searchWord + this.table + this.category);
+//            System.out.println(this.searchWord + this.table + this.category);
 
 //            executeQuery(con, "SELECT * FROM Person");
 //            executeUpdate(con, "INSERT "
@@ -107,11 +112,11 @@ public class EntertainmentModel implements DatabaseInterface {
 //                    + "VALUES ('Avatar', '2009', '')");
             if (whereCond == 1) {
                 executeQuery(con, "SELECT * FROM " + this.table
-                        + " WHERE " + col1 + " LIKE '%" + this.searchWord + "%'");
+                        + " WHERE " + col1 + " LIKE '%" + searchWord + "%'", chosenCategory);
             } else if (whereCond == 2) {
                 executeQuery(con, "SELECT * FROM " + this.table
                         + " WHERE " + col1 + " = '" + this.category
-                        + "' AND " + col2 + " LIKE '%" + this.searchWord + "%'");
+                        + "' AND " + col2 + " LIKE '%" + searchWord + "%'", chosenCategory);
             }
         } finally {
             try {
@@ -133,34 +138,34 @@ public class EntertainmentModel implements DatabaseInterface {
     public ObservableList<MusicAlbum> getAlbumList() {
         ObservableList<MusicAlbum> copyAlbumList = FXCollections.observableArrayList();
         copyAlbumList = albumList;
-        System.out.println(copyAlbumList + "hhhhhh");
         return copyAlbumList;
     }
 
     @Override
-    public void executeQuery(Connection con, String query) throws SQLException {
+    public void executeQuery(Connection con, String query, int chosenCategory) throws SQLException {
 
         Statement stmt = null;
         try {
             // Execute the SQL statement
             stmt = con.createStatement();
+
             ResultSet rs = stmt.executeQuery(query);
 
             // Get the attribute names
             ResultSetMetaData metaData = rs.getMetaData();
             int ccount = metaData.getColumnCount();
-            for (int c = 1; c <= ccount; c++) {
+            for (int c = 1;
+                    c <= ccount;
+                    c++) {
                 System.out.print(metaData.getColumnName(c) + "\t");
             }
+
             System.out.println("");
+
             // Get the attribute values
             while (rs.next()) {
-                // NB! This is an example, -not- the preferred way to retrieve data.
-                // You should use methods that return a specific data type, like
-                // rs.getInt(), rs.getString() or such.
-                // It's also advisable to store each tuple (row) in an object of
-                // custom type (e.g. Employee).
-                if (this.chosenCategory == 0) {
+
+                if (chosenCategory == 0) {
                     for (int c = 1; c <= ccount; c++) {
                         System.out.print(rs.getObject(c) + "\t");
                         System.out.println("");
@@ -171,23 +176,43 @@ public class EntertainmentModel implements DatabaseInterface {
                             personList.add(person);
                         }
                     }
-                }
-
-                if (this.chosenCategory == 1) {
+                } else if (chosenCategory == 1) {
                     for (int c = 1; c <= ccount; c++) {
                         System.out.print(rs.getString(c) + "\t");
 
                         if ((c % 5) == 0) {
                             searchArtistWithID(con, "Person", rs.getString(c - 2), "PersonID");
+                            searchGenreWithID(con, "Genre", rs.getString(c), "genreID");
 
-                            MusicAlbum musicAlbum = new MusicAlbum(rs.getString(c - 4), rs.getString(c - 3), this.foundArtistName, rs.getString(c - 1), rs.getString(c));
-                            System.out.println("hhhejjejej");
+                            MusicAlbum musicAlbum = new MusicAlbum(rs.getString(c - 4), rs.getString(c - 3), this.foundArtistName, rs.getString(c - 1), this.foundGenreName);
                             albumList.add(musicAlbum);
                         }
                     }
+                } else if (chosenCategory == 3) {
+                    for (int c = 1; c <= ccount; c++) {
+                        System.out.print(rs.getString(c) + "\t");
+
+                        if ((c % 2) == 0) {
+                            albumFromGenre.clear();
+                            searchAlbumsWithSpecificGenre(con, "MusicAlbum", rs.getString(c - 1), "genreID");
+                            //System.out.println(albumFromGenre + " <-- albumFromGenre");
+
+                            for (int i = 0; i < albumFromGenre.size(); i++) {
+                                this.table = "MusicAlbum";
+                                this.col1 = "albumName";
+                                this.whereCond = 1;
+                                testExample(1,albumFromGenre.get(i));
+                            }
+                        }
+                    }
+                } else {
+                    for (int c = 1; c <= ccount; c++) {
+                        System.out.print(rs.getString(c) + "\t");
+                    }
                 }
             }
-
+        } catch (Exception ex) {
+            Logger.getLogger(EntertainmentModel.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (stmt != null) {
                 stmt.close();
@@ -196,7 +221,7 @@ public class EntertainmentModel implements DatabaseInterface {
     }
 
     @Override
-    public void executeQueryWithArtist(Connection con, String query) throws SQLException {
+    public void executeQueryToFindArtistFromID(Connection con, String query) throws SQLException {
 
         Statement stmt = null;
         try {
@@ -210,22 +235,13 @@ public class EntertainmentModel implements DatabaseInterface {
             for (int c = 1; c <= ccount; c++) {
                 System.out.print(metaData.getColumnName(c) + "\t");
             }
+
             System.out.println("");
-            // Get the attribute values
-            System.out.println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+
             while (rs.next()) {
-                System.out.println("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
-                // NB! This is an example, -not- the preferred way to retrieve data.
-                // You should use methods that return a specific data type, like
-                // rs.getInt(), rs.getString() or such.
-                // It's also advisable to store each tuple (row) in an object of
-                // custom type (e.g. Employee).
-
                 for (int c = 1; c <= ccount; c++) {
-                    
-                        foundArtistName = rs.getString(c);
-                        System.out.println("FOund name " + foundArtistName);
-
+                    this.foundArtistName = rs.getString(c);
+                    System.out.println("Found name " + foundArtistName);
                 }
 
             }
@@ -238,11 +254,90 @@ public class EntertainmentModel implements DatabaseInterface {
     }
 
     @Override
+    public void executeQueryToFindGenreFromID(Connection con, String query) throws SQLException {
+
+        Statement stmt = null;
+        try {
+            // Execute the SQL statement
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            // Get the attribute names
+            ResultSetMetaData metaData = rs.getMetaData();
+            int ccount = metaData.getColumnCount();
+            for (int c = 1; c <= ccount; c++) {
+                System.out.print(metaData.getColumnName(c) + "\t");
+            }
+
+            System.out.println("");
+
+            while (rs.next()) {
+                for (int c = 1; c <= ccount; c++) {
+                    this.foundGenreName = rs.getString(c);
+                    System.out.println("Found genre " + foundGenreName);
+                }
+
+            }
+
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+    }
+
+    @Override
+    public void executeQueryToFindAlbumsWithSpecificGenre(Connection con, String query) throws SQLException {
+        Statement stmt = null;
+        try {
+            // Execute the SQL statement
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            // Get the attribute names
+            ResultSetMetaData metaData = rs.getMetaData();
+            int ccount = metaData.getColumnCount();
+            for (int c = 1; c <= ccount; c++) {
+                System.out.print(metaData.getColumnName(c) + "\t");
+            }
+
+            System.out.println("");
+
+            while (rs.next()) {
+                for (int c = 1; c <= ccount; c++) {
+                    System.out.println("Found albums with this genre: " + rs.getString(c));
+                    albumFromGenre.add(rs.getString(c));
+                }
+            }
+
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+    }
+
     public void searchArtistWithID(Connection con, String table, String searchFor, String catalog) {
         try {
-            executeQueryWithArtist(con, "SELECT personName FROM " + table + " WHERE " + catalog + " = '" + searchFor + "'");
+            executeQueryToFindArtistFromID(con, "SELECT personName FROM " + table + " WHERE " + catalog + " = '" + searchFor + "'");
         } catch (Exception e) {
             System.out.println("Error finding artist with ID!");
+        }
+    }
+
+    public void searchGenreWithID(Connection con, String table, String searchFor, String catalog) {
+        try {
+            executeQueryToFindGenreFromID(con, "SELECT category FROM " + table + " WHERE " + catalog + " = '" + searchFor + "'");
+        } catch (Exception e) {
+            System.out.println("Error finding genre with ID!");
+        }
+    }
+
+    public void searchAlbumsWithSpecificGenre(Connection con, String table, String searchFor, String catalog) {
+        try {
+            executeQueryToFindAlbumsWithSpecificGenre(con, "SELECT albumName FROM " + table + " WHERE " + catalog + " = '" + searchFor + "'");
+        } catch (Exception e) {
+            System.out.println("Error finding genre with name!");
         }
     }
 
@@ -262,3 +357,18 @@ public class EntertainmentModel implements DatabaseInterface {
         }
     }
 }
+
+/*
+
+            new Thread() {
+
+                public void run() {
+                    javafx.application.Platform.runLater(new Runnable() {
+                        public void run() {
+                            updateUI(empList);
+                        }
+                    });
+                }
+            }.start();
+
+ */
