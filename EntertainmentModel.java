@@ -24,7 +24,7 @@ import javafx.collections.ObservableList;
  *
  * @author Asad
  */
-public class EntertainmentModel implements DatabaseInterface {
+public class EntertainmentModel extends Thread implements DatabaseInterface {
 
     String user, server, pwd, database, category, args[], table, col1, col2, foundArtistName, foundGenreName, foundAlbumFromGenre;
     int whereCond = 0;
@@ -90,7 +90,21 @@ public class EntertainmentModel implements DatabaseInterface {
         }
         connect(args);
         try {
-            testExample(category, searchWord);
+            new Thread() {
+
+                public void run() {
+                    try {
+                        testExample(category, searchWord);
+                    } catch (Exception ex) {
+                        Logger.getLogger(EntertainmentModel.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    javafx.application.Platform.runLater(new Runnable() {
+                        public void run() {
+                            //updateUI(empList);
+                        }
+                    });
+                }
+            }.start();            
         } catch (Exception ex) {
             Logger.getLogger(EntertainmentModel.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -154,9 +168,7 @@ public class EntertainmentModel implements DatabaseInterface {
             // Get the attribute names
             ResultSetMetaData metaData = rs.getMetaData();
             int ccount = metaData.getColumnCount();
-            for (int c = 1;
-                    c <= ccount;
-                    c++) {
+            for (int c = 1; c <= ccount; c++) {
                 System.out.print(metaData.getColumnName(c) + "\t");
             }
 
@@ -201,7 +213,7 @@ public class EntertainmentModel implements DatabaseInterface {
                                 this.table = "MusicAlbum";
                                 this.col1 = "albumName";
                                 this.whereCond = 1;
-                                testExample(1,albumFromGenre.get(i));
+                                testExample(1, albumFromGenre.get(i));
                             }
                         }
                     }
