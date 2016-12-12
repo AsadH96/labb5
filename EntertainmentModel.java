@@ -23,8 +23,8 @@ import javafx.collections.ObservableList;
  */
 public class EntertainmentModel implements DatabaseInterface {
 
-    private String user, server, pwd, database, category, args[], table, col1, col2, foundArtistName, foundGenreName, foundAlbumFromGenre, tmp=null;
-    private int whereCond = 0,tmpEntries;
+    private String user, server, pwd, database, category, args[], table, col1, col2, foundArtistName, foundGenreName, foundAlbumFromGenre, tmp = null;
+    private int whereCond = 0, tmpEntries;
     private ObservableList<Person> personList = FXCollections.observableArrayList();
     private ObservableList<Album> albumList = FXCollections.observableArrayList();
     private ObservableList<Genre> genreList = FXCollections.observableArrayList();
@@ -124,16 +124,15 @@ public class EntertainmentModel implements DatabaseInterface {
             java.sql.Driver d = new com.mysql.jdbc.Driver();
             con = DriverManager.getConnection(server, user, pwd);
             System.out.println("Connected!");
-            executeQuery(con, "SELECT personID FROM Person WHERE personName ='" + artist + "'", 4);
-            if(tmp==null){
-                return false;
-            }
-            else
-                return true;
+//            executeQuery(con, "SELECT personID FROM Person WHERE personName ='" + artist + "'", 4);
+//            if (tmp == null) {
+//                return false;
+//            }
+            executeQuery(con, "SELECT albumID FROM Album", 6);
 //            executeUpdate(con, "INSERT "
 //                    + "INTO Album (albumID, albumName, artistID, releaseDate, genreID)"
-//                    + "VALUES (" + title + artist + year + genre + ")");
-//        return false;
+//                    + "VALUES ('" + tmpEntries + "','" + title + "','" + tmp + "','" + year + "','" + genre + "')");
+            return true;
         } finally {
             try {
                 if (con != null) {
@@ -144,8 +143,9 @@ public class EntertainmentModel implements DatabaseInterface {
             }
         }
     }
-    public void addPerson(String name, String role, String nationality) throws Exception{
-         Connection con = null;
+
+    public void addPerson(String name, String role, String nationality) throws Exception {
+        Connection con = null;
         try {
             Class.forName("com.mysql.jdbc.Driver");
             java.sql.Driver d = new com.mysql.jdbc.Driver();
@@ -154,7 +154,7 @@ public class EntertainmentModel implements DatabaseInterface {
             executeQuery(con, "SELECT personID FROM Person", 5);
             executeUpdate(con, "INSERT "
                     + "INTO Person(personID, personName, role, nationality) "
-                    + "VALUES('"+tmpEntries+"','"+name+"','"+role+"','"+nationality+"')");
+                    + "VALUES('" + tmpEntries + "','" + name + "','" + role + "','" + nationality + "')");
 
         } finally {
             try {
@@ -287,9 +287,16 @@ public class EntertainmentModel implements DatabaseInterface {
                         }
                         break;
                     case 5:
-                        if(rs.last()){
+                        if (rs.last()) {
                             System.out.println(rs.getString(1));
-                            tmpEntries=Integer.parseInt(rs.getString(1))+1;
+                            tmpEntries = Integer.parseInt(rs.getString(1)) + 1;
+                            System.out.println(tmpEntries);
+                        }
+                        break;
+                    case 6:
+                        if (rs.last()) {
+                            System.out.println(rs.getString(1));
+                            tmpEntries = Integer.parseInt(rs.getString(1)) + 1;
                             System.out.println(tmpEntries);
                         }
                         break;
