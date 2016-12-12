@@ -1,8 +1,5 @@
-package model;
+package Model;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -24,12 +21,12 @@ import javafx.collections.ObservableList;
  *
  * @author Asad
  */
-public class EntertainmentModel extends Thread implements DatabaseInterface {
+public class EntertainmentModel implements DatabaseInterface {
 
-    String user, server, pwd, database, category, args[], table, col1, col2, foundArtistName, foundGenreName, foundAlbumFromGenre;
-    int whereCond = 0;
+    private String user, server, pwd, database, category, args[], table, col1, col2, foundArtistName, foundGenreName, foundAlbumFromGenre, tmp=null;
+    private int whereCond = 0,tmpEntries;
     private ObservableList<Person> personList = FXCollections.observableArrayList();
-    private ObservableList<MusicAlbum> albumList = FXCollections.observableArrayList();
+    private ObservableList<Album> albumList = FXCollections.observableArrayList();
     private ObservableList<Genre> genreList = FXCollections.observableArrayList();
     private ArrayList<String> albumFromGenre = new ArrayList<>();
 
@@ -59,39 +56,48 @@ public class EntertainmentModel extends Thread implements DatabaseInterface {
         genreList.clear();
         albumFromGenre.clear();
 
-        if (category == 0) {
-            this.table = "Person";
-            this.col1 = "role";
-            this.category = "Artist";
-            this.col2 = "personName";
-            this.whereCond = 2;
-        } else if (category == 1) {
-            this.table = "MusicAlbum";
-            this.col1 = "albumName";
-            this.whereCond = 1;
-        } else if (category == 2) {
-
-        } else if (category == 3) {
-            this.table = "Genre";
-            this.col1 = "Category";
-            this.whereCond = 1;
-        } else if (category == 4) {
-            this.table = "Movie";
-            this.col1 = "title";
-            this.whereCond = 1;
-        } else if (category == 5) {
-
-        } else if (category == 6) {
-            this.category = "Director";
-            this.table = "Person";
-            this.col1 = "role";
-            this.col2 = "personName";
-            this.whereCond = 2;
+        switch (category) {
+            case 0:
+                this.table = "Person";
+                this.col1 = "role";
+                this.category = "Artist";
+                this.col2 = "personName";
+                this.whereCond = 2;
+                break;
+            case 1:
+                this.table = "Album";
+                this.col1 = "albumName";
+                this.whereCond = 1;
+                break;
+            case 2:
+                break;
+            case 3:
+                this.table = "Genre";
+                this.col1 = "Category";
+                this.whereCond = 1;
+                break;
+            case 4:
+                this.table = "Movie";
+                this.col1 = "title";
+                this.whereCond = 1;
+                break;
+            case 5:
+                break;
+            case 6:
+                this.category = "Director";
+                this.table = "Person";
+                this.col1 = "role";
+                this.col2 = "personName";
+                this.whereCond = 2;
+                break;
+            default:
+                break;
         }
         connect(args);
         try {
             new Thread() {
 
+                @Override
                 public void run() {
                     try {
                         testExample(category, searchWord);
@@ -99,14 +105,65 @@ public class EntertainmentModel extends Thread implements DatabaseInterface {
                         Logger.getLogger(EntertainmentModel.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     javafx.application.Platform.runLater(new Runnable() {
+                        @Override
                         public void run() {
                             //updateUI(empList);
                         }
                     });
                 }
-            }.start();            
+            }.start();
         } catch (Exception ex) {
             Logger.getLogger(EntertainmentModel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public boolean addAlbum(String title, String artist, String year, String genre) throws Exception {
+        Connection con = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            java.sql.Driver d = new com.mysql.jdbc.Driver();
+            con = DriverManager.getConnection(server, user, pwd);
+            System.out.println("Connected!");
+            executeQuery(con, "SELECT personID FROM Person WHERE personName ='" + artist + "'", 4);
+            if(tmp==null){
+                return false;
+            }
+            else
+                return true;
+//            executeUpdate(con, "INSERT "
+//                    + "INTO Album (albumID, albumName, artistID, releaseDate, genreID)"
+//                    + "VALUES (" + title + artist + year + genre + ")");
+//        return false;
+        } finally {
+            try {
+                if (con != null) {
+                    con.close();
+                    System.out.println("Connection closed.");
+                }
+            } catch (SQLException e) {
+            }
+        }
+    }
+    public void addPerson(String name, String role, String nationality) throws Exception{
+         Connection con = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            java.sql.Driver d = new com.mysql.jdbc.Driver();
+            con = DriverManager.getConnection(server, user, pwd);
+            System.out.println("Connected!");
+            executeQuery(con, "SELECT personID FROM Person", 5);
+            executeUpdate(con, "INSERT "
+                    + "INTO Person(personID, personName, role, nationality) "
+                    + "VALUES('"+tmpEntries+"','"+name+"','"+role+"','"+nationality+"')");
+
+        } finally {
+            try {
+                if (con != null) {
+                    con.close();
+                    System.out.println("Connection closed.");
+                }
+            } catch (SQLException e) {
+            }
         }
     }
 
@@ -149,8 +206,8 @@ public class EntertainmentModel extends Thread implements DatabaseInterface {
         return copyPersonList;
     }
 
-    public ObservableList<MusicAlbum> getAlbumList() {
-        ObservableList<MusicAlbum> copyAlbumList = FXCollections.observableArrayList();
+    public ObservableList<Album> getAlbumList() {
+        ObservableList<Album> copyAlbumList = FXCollections.observableArrayList();
         copyAlbumList = albumList;
         return copyAlbumList;
     }
@@ -168,7 +225,9 @@ public class EntertainmentModel extends Thread implements DatabaseInterface {
             // Get the attribute names
             ResultSetMetaData metaData = rs.getMetaData();
             int ccount = metaData.getColumnCount();
-            for (int c = 1; c <= ccount; c++) {
+            for (int c = 1;
+                    c <= ccount;
+                    c++) {
                 System.out.print(metaData.getColumnName(c) + "\t");
             }
 
@@ -177,50 +236,68 @@ public class EntertainmentModel extends Thread implements DatabaseInterface {
             // Get the attribute values
             while (rs.next()) {
 
-                if (chosenCategory == 0) {
-                    for (int c = 1; c <= ccount; c++) {
-                        System.out.print(rs.getObject(c) + "\t");
-                        System.out.println("");
+                switch (chosenCategory) {
+                    case 0:
+                        for (int c = 1; c <= ccount; c++) {
+                            System.out.print(rs.getObject(c) + "\t");
+                            System.out.println("");
 
-                        if ((c % 4) == 0) {
-                            Person person = new Person(rs.getString(c - 3), rs.getString(c - 2), rs.getString(c - 1), rs.getString(c));
+                            if ((c % 4) == 0) {
+                                Person person = new Person(rs.getString(c - 3), rs.getString(c - 2), rs.getString(c - 1), rs.getString(c));
 
-                            personList.add(person);
-                        }
-                    }
-                } else if (chosenCategory == 1) {
-                    for (int c = 1; c <= ccount; c++) {
-                        System.out.print(rs.getString(c) + "\t");
-
-                        if ((c % 5) == 0) {
-                            searchArtistWithID(con, "Person", rs.getString(c - 2), "PersonID");
-                            searchGenreWithID(con, "Genre", rs.getString(c), "genreID");
-
-                            MusicAlbum musicAlbum = new MusicAlbum(rs.getString(c - 4), rs.getString(c - 3), this.foundArtistName, rs.getString(c - 1), this.foundGenreName);
-                            albumList.add(musicAlbum);
-                        }
-                    }
-                } else if (chosenCategory == 3) {
-                    for (int c = 1; c <= ccount; c++) {
-                        System.out.print(rs.getString(c) + "\t");
-
-                        if ((c % 2) == 0) {
-                            albumFromGenre.clear();
-                            searchAlbumsWithSpecificGenre(con, "MusicAlbum", rs.getString(c - 1), "genreID");
-                            //System.out.println(albumFromGenre + " <-- albumFromGenre");
-
-                            for (int i = 0; i < albumFromGenre.size(); i++) {
-                                this.table = "MusicAlbum";
-                                this.col1 = "albumName";
-                                this.whereCond = 1;
-                                testExample(1, albumFromGenre.get(i));
+                                personList.add(person);
                             }
                         }
-                    }
-                } else {
-                    for (int c = 1; c <= ccount; c++) {
-                        System.out.print(rs.getString(c) + "\t");
-                    }
+                        break;
+                    case 1:
+                        for (int c = 1; c <= ccount; c++) {
+                            System.out.print(rs.getString(c) + "\t");
+
+                            if ((c % 5) == 0) {
+                                searchArtistWithID(con, "Person", rs.getString(c - 2), "PersonID");
+                                searchGenreWithID(con, "Genre", rs.getString(c), "genreID");
+
+                                Album musicAlbum = new Album(rs.getString(c - 4), rs.getString(c - 3), this.foundArtistName, rs.getString(c - 1), this.foundGenreName);
+                                albumList.add(musicAlbum);
+                            }
+                        }
+                        break;
+                    case 3:
+                        for (int c = 1; c <= ccount; c++) {
+                            System.out.print(rs.getString(c) + "\t");
+
+                            if ((c % 2) == 0) {
+                                albumFromGenre.clear();
+                                searchAlbumsWithSpecificGenre(con, "Album", rs.getString(c - 1), "genreID");
+                                //System.out.println(albumFromGenre + " <-- albumFromGenre");
+
+                                for (int i = 0; i < albumFromGenre.size(); i++) {
+                                    this.table = "Album";
+                                    this.col1 = "albumName";
+                                    this.whereCond = 1;
+                                    testExample(1, albumFromGenre.get(i));
+                                }
+                            }
+                        }
+                        break;
+                    case 4:
+                        for (int c = 1; c <= ccount; c++) {
+                            System.out.print(rs.getObject(c) + "\t");
+                            tmp = rs.getString(c);
+                        }
+                        break;
+                    case 5:
+                        if(rs.last()){
+                            System.out.println(rs.getString(1));
+                            tmpEntries=Integer.parseInt(rs.getString(1))+1;
+                            System.out.println(tmpEntries);
+                        }
+                        break;
+                    default:
+                        for (int c = 1; c <= ccount; c++) {
+                            System.out.print(rs.getString(c) + "\t");
+                        }
+                        break;
                 }
             }
         } catch (Exception ex) {
@@ -369,18 +446,3 @@ public class EntertainmentModel extends Thread implements DatabaseInterface {
         }
     }
 }
-
-/*
-
-            new Thread() {
-
-                public void run() {
-                    javafx.application.Platform.runLater(new Runnable() {
-                        public void run() {
-                            updateUI(empList);
-                        }
-                    });
-                }
-            }.start();
-
- */
