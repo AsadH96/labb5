@@ -137,18 +137,26 @@ public class EntertainmentView extends BorderPane {
         pane.add(albumGenre, 2, 4);
         pane.add(add, 1, 5);
 
-        add.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (!controller.addAlbum(albumName.getText(), albumArtist.getText(), albumYear.getText(), albumGenre.getText())) {
-                    updatePerson();
-                }
-            }
-        });
-
         Scene loginScene = new Scene(pane, 300, 200);
         addAlbum.setScene(loginScene);
         addAlbum.show();
+         add.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                int updateFrom = controller.addAlbum(albumName.getText(), albumArtist.getText(), albumYear.getText(), albumGenre.getText());
+                switch (updateFrom) {
+                    case 1:
+                        updatePerson();
+                        break;
+                    case 2:
+                        updateGenre();
+                        break;
+                    default:
+                        addAlbum.close();
+                        break;
+                }
+            }
+        });
     }
 
     public void updatePerson() {
@@ -161,7 +169,7 @@ public class EntertainmentView extends BorderPane {
         pane.setPadding(new Insets(20, 20, 20, 20));
         pane.setHgap(10);
         pane.setVgap(10);
-        
+
         TextField name = new TextField();
         TextField role = new TextField();
         TextField nationality = new TextField();
@@ -179,11 +187,41 @@ public class EntertainmentView extends BorderPane {
         Scene loginScene = new Scene(pane, 300, 200);
         updatePerson.setScene(loginScene);
         updatePerson.show();
-                add.setOnAction(new EventHandler<ActionEvent>() {
+        add.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 controller.addPerson(name.getText(), role.getText(), nationality.getText());
                 updatePerson.close();
+            }
+        });
+    }
+    public void updateGenre(){
+        Stage updateGenre = new Stage();
+        updateGenre.initModality(Modality.APPLICATION_MODAL);
+        updateGenre.setResizable(false);
+        updateGenre.setTitle("Genre doesn't exist, please add information about the genre");
+
+        GridPane pane = new GridPane();
+        pane.setPadding(new Insets(20, 20, 20, 20));
+        pane.setHgap(10);
+        pane.setVgap(10);
+
+        TextField category = new TextField();
+        Button add = new Button();
+        add.setText("Add");
+
+        pane.add(new Label("New Category:"), 1, 1);
+        pane.add(category, 2, 1);
+        pane.add(add,1,3);
+
+        Scene loginScene = new Scene(pane, 300, 200);
+        updateGenre.setScene(loginScene);
+        updateGenre.show();
+        add.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                controller.addGenre(category.getText());
+                updateGenre.close();
             }
         });
     }

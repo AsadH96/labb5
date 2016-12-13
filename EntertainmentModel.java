@@ -117,8 +117,9 @@ public class EntertainmentModel implements DatabaseInterface {
         }
     }
 
-    public boolean addAlbum(String title, String artist, String year, String genre) throws Exception {
+    public int addAlbum(String title, String artist, String year, String genre) throws Exception {
         Connection con = null;
+        int noPerson=1,noGenre=2,success=3;
         try {
             Class.forName("com.mysql.jdbc.Driver");
             java.sql.Driver d = new com.mysql.jdbc.Driver();
@@ -126,14 +127,17 @@ public class EntertainmentModel implements DatabaseInterface {
             System.out.println("Connected!");
             executeQuery(con, "SELECT personID FROM Person WHERE personName ='" + artist + "'", 4);
             if (tmp == null) {
-                return false;
+                return noPerson;
             }
             executeQuery(con,"SELECT genreID FROM Genre WHERE category ='" + genre + "'", 7);
+            if( tmpGenre==null){
+                return noGenre;
+            }
             executeQuery(con, "SELECT albumID FROM Album", 6);
             executeUpdate(con, "INSERT "
                     + "INTO Album (albumID, albumName, artistID, releaseDate, genreID)"
-                    + "VALUES ('" + tmpEntries + "','" + title + "','" + tmp + "','" + year + "','" + genre + "')");
-            return true;
+                    + "VALUES ('" + tmpEntries + "','" + title + "','" + tmp + "','" + year + "','" + tmpGenre + "')");
+            return success;
         } finally {
             try {
                 if (con != null) {
@@ -156,6 +160,28 @@ public class EntertainmentModel implements DatabaseInterface {
             executeUpdate(con, "INSERT "
                     + "INTO Person(personID, personName, role, nationality) "
                     + "VALUES('" + tmpEntries + "','" + name + "','" + role + "','" + nationality + "')");
+
+        } finally {
+            try {
+                if (con != null) {
+                    con.close();
+                    System.out.println("Connection closed.");
+                }
+            } catch (SQLException e) {
+            }
+        }
+    }
+    public void addGenre(String category) throws Exception{
+              Connection con = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            java.sql.Driver d = new com.mysql.jdbc.Driver();
+            con = DriverManager.getConnection(server, user, pwd);
+            System.out.println("Connected!");
+            executeQuery(con, "SELECT genreID FROM Genre", 5);
+            executeUpdate(con, "INSERT "
+                    + "INTO Genre(genreID, category) "
+                    + "VALUES('" + tmpEntries + "','" + category + "')");
 
         } finally {
             try {
@@ -288,17 +314,17 @@ public class EntertainmentModel implements DatabaseInterface {
                         }
                         break;
                     case 5:
-                        if (rs.last()) {
+                        if (rs.isLast()) {
                             System.out.println(rs.getString(1));
                             tmpEntries = Integer.parseInt(rs.getString(1)) + 1;
                             System.out.println(tmpEntries);
                         }
                         break;
                     case 6:
-                        if (rs.last()) {
+                        if (rs.isLast()) {
                             System.out.println(rs.getString(1));
                             tmpEntries = Integer.parseInt(rs.getString(1)) + 1;
-                            System.out.println(tmpEntries);
+                            System.out.println(tmpEntries+"HASDJFASDGADSHGASNGJANSDJGNAJSDGNASDJGAJDSGNASJDGNASJDGDNADSJGNASJDGAN");
                         }
                         break;
                     case 7:
