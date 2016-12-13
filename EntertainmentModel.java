@@ -23,7 +23,7 @@ import javafx.collections.ObservableList;
  */
 public class EntertainmentModel implements DatabaseInterface {
 
-    private String user, server, pwd, database, category, args[], table, col1, col2, foundArtistName, foundGenreName, foundAlbumFromGenre, tmp = null;
+    private String user, server, pwd, database, category, args[], table, col1, col2, foundArtistName, foundGenreName, foundAlbumFromGenre, tmp = null,tmpGenre=null;
     private int whereCond = 0, tmpEntries;
     private ObservableList<Person> personList = FXCollections.observableArrayList();
     private ObservableList<Album> albumList = FXCollections.observableArrayList();
@@ -124,14 +124,15 @@ public class EntertainmentModel implements DatabaseInterface {
             java.sql.Driver d = new com.mysql.jdbc.Driver();
             con = DriverManager.getConnection(server, user, pwd);
             System.out.println("Connected!");
-//            executeQuery(con, "SELECT personID FROM Person WHERE personName ='" + artist + "'", 4);
-//            if (tmp == null) {
-//                return false;
-//            }
+            executeQuery(con, "SELECT personID FROM Person WHERE personName ='" + artist + "'", 4);
+            if (tmp == null) {
+                return false;
+            }
+            executeQuery(con,"SELECT genreID FROM Genre WHERE category ='" + genre + "'", 7);
             executeQuery(con, "SELECT albumID FROM Album", 6);
-//            executeUpdate(con, "INSERT "
-//                    + "INTO Album (albumID, albumName, artistID, releaseDate, genreID)"
-//                    + "VALUES ('" + tmpEntries + "','" + title + "','" + tmp + "','" + year + "','" + genre + "')");
+            executeUpdate(con, "INSERT "
+                    + "INTO Album (albumID, albumName, artistID, releaseDate, genreID)"
+                    + "VALUES ('" + tmpEntries + "','" + title + "','" + tmp + "','" + year + "','" + genre + "')");
             return true;
         } finally {
             try {
@@ -298,6 +299,12 @@ public class EntertainmentModel implements DatabaseInterface {
                             System.out.println(rs.getString(1));
                             tmpEntries = Integer.parseInt(rs.getString(1)) + 1;
                             System.out.println(tmpEntries);
+                        }
+                        break;
+                    case 7:
+                        for (int c = 1; c <= ccount; c++) {
+                            System.out.print(rs.getObject(c) + "\t");
+                            tmpGenre = rs.getString(c);
                         }
                         break;
                     default:
