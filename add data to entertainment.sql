@@ -3,7 +3,7 @@ values ('01','Micheal Jackson','Artist', 'USA');
 insert into Person
 values ('02', 'Justin Bieber', 'Artist', 'Canada');
 insert into Person
-values ('03', 'Selana Gomez', 'Artist', 'USA');
+values ('03', 'Selena Gomez', 'Artist', 'USA');
 insert into Person
 values ('04', 'Eminem', 'Artist', 'USA');
 insert into Person
