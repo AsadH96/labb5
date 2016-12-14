@@ -690,11 +690,11 @@ public class EntertainmentModel extends Thread implements DatabaseInterface {
 
             con.setAutoCommit(false);
 
-            executeQueryToFindArtistFromName(con, "SELECT personID FROM Person WHERE personName = '" + artist + "'");
-            if (!personSuccess) {
-                status = false;
-                return false;
-            }
+//            executeQueryToFindArtistFromName(con, "SELECT personID FROM Person WHERE personName = '" + artist + "'");
+//            if (!personSuccess) {
+//                status = false;
+//                return false;
+//            }
 
             executeQueryToFindGenreFromCategory(con, "SELECT genreID FROM Genre WHERE category ='" + genre + "'");
             if (!genreSuccess) {
@@ -704,8 +704,8 @@ public class EntertainmentModel extends Thread implements DatabaseInterface {
 
 //            getLastPrimaryKeyInAlbum(con, "SELECT albumID FROM Album");
             executeUpdate(con, "INSERT "
-                    + "INTO Album (albumName, artistID, releaseDate, genreID)"
-                    + "VALUES ('" + albumName + "','" + pkPerson + "','" + released + "','" + pkGenre + "')");
+                    + "INTO Album (albumName, releaseDate, genreID)"
+                    + "VALUES ('" + albumName + "','" + released + "','" + pkGenre + "')");
             genreSuccess = true;
             personSuccess = true;
             System.out.println("The album has been added!");

@@ -33,4 +33,5 @@ public interface DatabaseInterface {
     public void getLastPrimaryKeyInPerson(Connection con, String query) throws SQLException;
 
     public void getLastPrimaryKeyInGenre(Connection con, String query) throws SQLException;
+
 }
