@@ -10,42 +10,36 @@ package model;
  * @author Asad
  */
 public class MusicAlbum {
-    
+
     private String albumID;
     private String albumName;
-    private String artistID;
     private String releaseDate;
     private String genreID;
-    
-    public MusicAlbum(String albumID, String albumName, String artistID, String releaseDate, String genreID){
+
+    public MusicAlbum(String albumID, String albumName, String releaseDate, String genreID) {
         this.albumID = albumID;
         this.albumName = albumName;
-        this.artistID = artistID;
         this.releaseDate = releaseDate;
         this.genreID = genreID;
     }
-    
-    public String getAlbumID(){
+
+    public String getAlbumID() {
         return this.albumID;
     }
-    
-    public String getAlbumName(){
+
+    public String getAlbumName() {
         return this.albumName;
     }
-    
-    public String getArtistID(){
-        return this.artistID;
-    }
-    
-    public String getReleaseDate(){
+
+    public String getReleaseDate() {
         return this.releaseDate;
     }
-    
-    public String getGenreID(){
+
+    public String getGenreID() {
         return this.genreID;
     }
-    
-    public String toString(){
-        return this.albumID + this.albumName + this.artistID + this.releaseDate + this.genreID + "\n";
+
+    public String toString() {
+        return this.albumID + this.albumName + this.releaseDate + this.genreID + "\n";
     }
 }

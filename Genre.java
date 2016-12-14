@@ -3,27 +3,32 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Model;
+package model;
 
 /**
  *
- * @author LENOVO
+ * @author Asad
  */
 public class Genre {
-    private String genreID, category;
-    public Genre(String genreID, String category){
-        this.genreID=genreID;
-        this.category=category;
+
+    private String genreID;
+    private String category;
+
+    public Genre(String genreID, String category) {
+        this.genreID = genreID;
+        this.category = category;
     }
-    public String getGenreID(){
-        return genreID;
+
+    public String getGenreID() {
+        return this.genreID;
     }
-    public String getCategory(){
-        return category;
+
+    public String getCategory() {
+        return this.category;
     }
+
     @Override
-    public String toString(){
-        String info= "GenreID:"+genreID+" Category:"+category;
-        return info;
+    public String toString() {
+        return this.genreID + this.category;
     }
 }
